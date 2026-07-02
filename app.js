@@ -5,7 +5,7 @@
    which matters since it needs to run happily from an iPad. */
 
 const state = {
-  screen: "home", // home | quiz | quiz-summary | roleplay-list | roleplay | roleplay-summary | dashboard
+  screen: "home", // home | quiz | quiz-summary | roleplay-list | roleplay | roleplay-summary | dashboard | stickers
   settings: Storage.loadSettings(),
   quiz: null,
   roleplay: null,
@@ -25,7 +25,8 @@ function render() {
     "roleplay-list": renderRoleplayList,
     roleplay: renderRoleplay,
     "roleplay-summary": renderRoleplaySummary,
-    dashboard: renderDashboard
+    dashboard: renderDashboard,
+    stickers: renderStickers
   }[state.screen];
   root.appendChild(view());
 }
@@ -195,6 +196,16 @@ function renderHome() {
   roleplayTile.onclick = () => go("roleplay-list");
   grid.appendChild(roleplayTile);
 
+  const stickersTile = el("button", "tile tile-stickers");
+  const stickerCount = Storage.loadStickers().length;
+  stickersTile.innerHTML = `
+    <div class="tile-icon">${simpleIcon("stickers")}</div>
+    <div class="tile-text"><h2>My Stickers</h2><p>${
+      stickerCount ? `${stickerCount} collected so far` : "Answer questions to start collecting"
+    }</p></div>`;
+  stickersTile.onclick = () => go("stickers");
+  grid.appendChild(stickersTile);
+
   const dashTile = el("button", "tile tile-dashboard");
   dashTile.innerHTML = `
     <div class="tile-icon">${simpleIcon("dashboard")}</div>
@@ -215,8 +226,43 @@ function simpleIcon(kind) {
     return `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="rgba(255,255,255,0.25)"/>
       <circle cx="24" cy="28" r="8" fill="#fff"/><circle cx="42" cy="34" r="8" fill="#fff" opacity="0.75"/></svg>`;
   }
+  if (kind === "stickers") {
+    return `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="rgba(255,255,255,0.25)"/>
+      <text x="32" y="42" font-size="26" text-anchor="middle">⭐</text></svg>`;
+  }
   return `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="rgba(255,255,255,0.25)"/>
     <rect x="18" y="20" width="28" height="20" rx="4" fill="#fff"/><rect x="24" y="44" width="16" height="4" rx="2" fill="#fff"/></svg>`;
+}
+
+/* ==========================================================================
+   STICKER COLLECTION
+   ========================================================================== */
+function renderStickers() {
+  const screen = el("div", "screen");
+  screen.appendChild(topbar("My Stickers", "home"));
+  screen.appendChild(el("div", "mascot-wrap", mascotSVG("happy")));
+
+  const earned = Storage.loadStickers();
+  const counts = new Map();
+  earned.forEach(s => counts.set(s.name, (counts.get(s.name) || 0) + 1));
+
+  const grid = el("div", "sticker-grid");
+  STICKER_POOL.forEach(sticker => {
+    const count = counts.get(sticker.name) || 0;
+    const card = el("div", `sticker-card${count ? "" : " locked"}`);
+    card.innerHTML = `
+      <div class="sticker-card-emoji">${sticker.emoji}</div>
+      <div class="sticker-card-name">${sticker.name}</div>
+      ${count > 1 ? `<div class="sticker-card-count">×${count}</div>` : ""}`;
+    grid.appendChild(card);
+  });
+  screen.appendChild(grid);
+
+  if (!earned.length) {
+    screen.appendChild(el("div", "empty-note", "Answer questions politely to start earning stickers!"));
+  }
+
+  return screen;
 }
 
 /* ==========================================================================
@@ -449,6 +495,33 @@ function retryQuiz(message) {
   setTimeout(() => speakCurrentQuizQuestion(), 900);
 }
 
+/* Shared by both quiz and roleplay: rolls a random celebration (see
+   rewards.js) and, if it earned a sticker, shows a toast for it. The
+   effect host is appended to document.body rather than #app so it
+   survives the re-render that happens a moment later when the round
+   advances. */
+function celebrateSuccess(mascotWrap) {
+  const effectHost = el("div", "confetti-container");
+  document.body.appendChild(effectHost);
+  const { sticker } = Rewards.celebrate({ mascotWrap, effectHost });
+  setTimeout(() => effectHost.remove(), 2300);
+  if (sticker) showStickerToast(sticker);
+}
+
+function showStickerToast(sticker) {
+  const toast = el("div", "sticker-toast");
+  toast.innerHTML = `
+    <div class="sticker-toast-emoji">${sticker.emoji}</div>
+    <div class="sticker-toast-text"><strong>New sticker!</strong><span>${sticker.name}</span></div>`;
+  document.body.appendChild(toast);
+  Audio_.playStickerPop();
+  setTimeout(() => toast.classList.add("show"), 20);
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => toast.remove(), 300);
+  }, 2000);
+}
+
 function succeedQuiz() {
   state.quiz.correct++;
   state.quiz.awaitingAdvance = true;
@@ -465,12 +538,7 @@ function succeedQuiz() {
     "You did it!"
   ]);
   banner.className = "feedback-banner positive";
-  Audio_.playSuccessChime();
-  if (mascotWrap) mascotWrap.classList.add("celebrate");
-  const confettiHost = el("div", "confetti-container");
-  document.body.appendChild(confettiHost);
-  Audio_.burstConfetti(confettiHost);
-  setTimeout(() => confettiHost.remove(), 2300);
+  celebrateSuccess(mascotWrap);
 
   setTimeout(() => {
     state.quiz.index++;
@@ -635,8 +703,7 @@ function succeedRoleplay(saidYes) {
   const reply = saidYes ? beat.replyIfYes : beat.replyIfNo;
   banner.textContent = "Nicely said!";
   banner.className = "feedback-banner positive";
-  Audio_.playSuccessChime();
-  if (mascotWrap) mascotWrap.classList.add("celebrate");
+  celebrateSuccess(mascotWrap);
 
   Audio_.speak(reply, asker.gender, () => {
     setTimeout(() => {

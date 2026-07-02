@@ -67,6 +67,24 @@ const DEFAULT_QUESTIONS = [
   { spoken: "Is your bed in the kitchen?", expected: "no" }
 ];
 
+/* Stickers: the collectible reward a correct answer sometimes earns
+   (see rewards.js). Kept as emoji + name so, like everything else here,
+   there's nothing to host/download. */
+const STICKER_POOL = [
+  { emoji: "🌟", name: "Shining Star" },
+  { emoji: "🏅", name: "Manners Medal" },
+  { emoji: "🎖️", name: "Politeness Ribbon" },
+  { emoji: "💎", name: "Sparkle Gem" },
+  { emoji: "🌈", name: "Rainbow Badge" },
+  { emoji: "🦄", name: "Unicorn Friend" },
+  { emoji: "🍭", name: "Sweet Treat" },
+  { emoji: "🐝", name: "Busy Bee" },
+  { emoji: "🐣", name: "Little Chick" },
+  { emoji: "🎈", name: "Party Balloon" },
+  { emoji: "🌻", name: "Sunny Flower" },
+  { emoji: "🐬", name: "Happy Dolphin" }
+];
+
 /* Roleplay scenarios: short 2-3 beat conversations that teach WHEN to
    use "sir"/"ma'am", not just the words. Each beat is something the
    asker says, plus the polite reply the child taps, plus a short

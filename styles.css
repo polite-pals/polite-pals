@@ -154,6 +154,7 @@ button {
 .tile.tile-quiz { background: linear-gradient(135deg, var(--coral), var(--coral-dark)); }
 .tile.tile-roleplay { background: linear-gradient(135deg, var(--sky), var(--sky-dark)); }
 .tile.tile-dashboard { background: linear-gradient(135deg, var(--plum-soft), var(--plum)); }
+.tile.tile-stickers { background: linear-gradient(135deg, var(--sunny), var(--sunny-dark)); }
 
 .tile-icon {
   width: 64px;
@@ -387,6 +388,95 @@ button {
 @keyframes confettiFall {
   0% { top: -20px; opacity: 1; }
   100% { top: 100vh; opacity: 0.4; }
+}
+
+.sparkle-piece {
+  position: absolute;
+  pointer-events: none;
+  animation-name: sparkleTwinkle;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+}
+@keyframes sparkleTwinkle {
+  0% { opacity: 0; transform: scale(0.4) translateY(0) rotate(0deg); }
+  30% { opacity: 1; transform: scale(1.1) translateY(-10px) rotate(20deg); }
+  100% { opacity: 0; transform: scale(0.8) translateY(-40px) rotate(50deg); }
+}
+
+/* ==========================================================================
+   Sticker reward toast
+   ========================================================================== */
+.sticker-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 32px;
+  transform: translate(-50%, 20px);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  border-radius: 999px;
+  padding: 10px 22px 10px 12px;
+  box-shadow: var(--shadow-soft);
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 60;
+  pointer-events: none;
+}
+.sticker-toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.sticker-toast-emoji { font-size: 2rem; line-height: 1; }
+.sticker-toast-text {
+  display: flex;
+  flex-direction: column;
+  font-family: "Fredoka", sans-serif;
+  color: var(--plum);
+  line-height: 1.25;
+}
+.sticker-toast-text strong { font-size: 0.95rem; }
+.sticker-toast-text span { font-size: 0.85rem; color: var(--plum-soft); }
+
+/* ==========================================================================
+   Sticker collection screen
+   ========================================================================== */
+.sticker-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+.sticker-card {
+  position: relative;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: var(--shadow-soft);
+  padding: 16px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+.sticker-card-emoji { font-size: 2.2rem; }
+.sticker-card-name {
+  font-family: "Fredoka", sans-serif;
+  font-size: 0.8rem;
+  color: var(--plum);
+}
+.sticker-card-count {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--plum-soft);
+}
+.sticker-card.locked {
+  opacity: 0.35;
+  filter: grayscale(1);
+  box-shadow: none;
 }
 
 /* ==========================================================================

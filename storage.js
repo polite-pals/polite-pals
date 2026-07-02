@@ -6,7 +6,8 @@
 const STORAGE_KEYS = {
   settings: "yma_settings",
   sessions: "yma_sessions",
-  customQuestions: "yma_custom_questions"
+  customQuestions: "yma_custom_questions",
+  stickers: "yma_stickers"
 };
 
 const DEFAULT_SETTINGS = {
@@ -67,6 +68,24 @@ const Storage = {
     return trimmed;
   },
 
+  loadStickers() {
+    return readJSON(STORAGE_KEYS.stickers, []);
+  },
+
+  addSticker(sticker) {
+    const stickers = Storage.loadStickers();
+    stickers.unshift({
+      id: `st_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+      date: new Date().toISOString(),
+      emoji: sticker.emoji,
+      name: sticker.name
+    });
+    // Keep the most recent 200 so storage doesn't grow forever.
+    const trimmed = stickers.slice(0, 200);
+    writeJSON(STORAGE_KEYS.stickers, trimmed);
+    return trimmed;
+  },
+
   loadCustomQuestions() {
     return readJSON(STORAGE_KEYS.customQuestions, []);
   },
@@ -92,5 +111,6 @@ const Storage = {
     localStorage.removeItem(STORAGE_KEYS.sessions);
     localStorage.removeItem(STORAGE_KEYS.settings);
     localStorage.removeItem(STORAGE_KEYS.customQuestions);
+    localStorage.removeItem(STORAGE_KEYS.stickers);
   }
 };
