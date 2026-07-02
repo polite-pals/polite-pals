@@ -1,0 +1,616 @@
+/* ==========================================================================
+   Design tokens
+   A warm, chunky "picture book" look — rounded everything, saturated
+   primary colors, thick friendly borders. Deliberately not the
+   cream+terracotta / dark+neon defaults; this should read like a
+   toddler's board book, not a SaaS landing page.
+   ========================================================================== */
+:root {
+  --cream: #FFF8EC;
+  --coral: #FF6B5B;
+  --coral-dark: #E8543F;
+  --sunny: #FFC94A;
+  --sunny-dark: #E8AE2A;
+  --sky: #4FB6C4;
+  --sky-dark: #35939F;
+  --plum: #3B2F63;
+  --plum-soft: #6B5F94;
+  --grass: #4FAF6D;
+  --grass-soft: #E4F5E9;
+  --berry: #E85D75;
+  --berry-soft: #FCE8EB;
+  --card-radius: 28px;
+  --btn-radius: 24px;
+  --shadow-soft: 0 10px 0 rgba(59, 47, 99, 0.08), 0 14px 24px rgba(59, 47, 99, 0.10);
+  --shadow-press: 0 4px 0 rgba(59, 47, 99, 0.10), 0 6px 12px rgba(59, 47, 99, 0.08);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: var(--cream);
+  background-image:
+    radial-gradient(circle at 10% 12%, rgba(255, 201, 74, 0.25), transparent 40%),
+    radial-gradient(circle at 90% 85%, rgba(79, 182, 196, 0.20), transparent 45%);
+  color: var(--plum);
+  font-family: "Nunito", -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+h1, h2, h3, .display {
+  font-family: "Fredoka", "Nunito", sans-serif;
+  font-weight: 600;
+  margin: 0;
+}
+
+button {
+  font-family: inherit;
+}
+
+#app {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
+}
+
+.screen {
+  width: 100%;
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  animation: screenIn 0.35s ease-out;
+}
+
+@keyframes screenIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   Top bar / nav
+   ========================================================================== */
+.topbar {
+  width: 100%;
+  max-width: 640px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.back-button {
+  background: #fff;
+  border: 3px solid var(--plum);
+  border-radius: 999px;
+  width: 52px;
+  height: 52px;
+  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  flex-shrink: 0;
+}
+.back-button:active { box-shadow: var(--shadow-press); transform: translateY(3px); }
+
+.app-title {
+  font-size: 1.4rem;
+  color: var(--plum);
+  text-align: center;
+  flex: 1;
+}
+
+.spacer-52 { width: 52px; flex-shrink: 0; }
+
+/* ==========================================================================
+   Home screen
+   ========================================================================== */
+.hero {
+  text-align: center;
+  margin-top: 6px;
+}
+.hero h1 {
+  font-size: 2.4rem;
+  color: var(--plum);
+  line-height: 1.15;
+}
+.hero p {
+  font-size: 1.15rem;
+  color: var(--plum-soft);
+  margin-top: 8px;
+}
+
+.tile-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+
+.tile {
+  border: none;
+  border-radius: var(--card-radius);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  color: #fff;
+  font-family: "Fredoka", sans-serif;
+}
+.tile:active { box-shadow: var(--shadow-press); transform: translateY(4px); }
+.tile.tile-quiz { background: linear-gradient(135deg, var(--coral), var(--coral-dark)); }
+.tile.tile-roleplay { background: linear-gradient(135deg, var(--sky), var(--sky-dark)); }
+.tile.tile-dashboard { background: linear-gradient(135deg, var(--plum-soft), var(--plum)); }
+
+.tile-icon {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+}
+.tile-text h2 { font-size: 1.4rem; }
+.tile-text p { margin: 4px 0 0; font-size: 1rem; opacity: 0.92; font-family: "Nunito", sans-serif; }
+
+/* ==========================================================================
+   Mascot ("Sunny") — the signature element. A simple drawn sun-face
+   that bounces in, blinks, and reacts. Built entirely in SVG/CSS so it
+   never depends on hosted image or video assets.
+   ========================================================================== */
+.mascot-wrap {
+  width: 120px;
+  height: 120px;
+  animation: mascotBob 3.2s ease-in-out infinite;
+}
+@keyframes mascotBob {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-6px) rotate(2deg); }
+}
+.mascot-wrap.celebrate {
+  animation: mascotCelebrate 0.6s ease-in-out;
+}
+@keyframes mascotCelebrate {
+  0% { transform: scale(1) rotate(0deg); }
+  30% { transform: scale(1.25) rotate(-8deg); }
+  60% { transform: scale(1.1) rotate(8deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+/* ==========================================================================
+   Asker card — shows who is asking the question
+   ========================================================================== */
+.asker-card {
+  width: 100%;
+  background: #fff;
+  border-radius: var(--card-radius);
+  box-shadow: var(--shadow-soft);
+  padding: 26px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+.asker-avatar { width: 100px; height: 100px; }
+.asker-name {
+  font-family: "Fredoka", sans-serif;
+  font-size: 1.2rem;
+  color: var(--plum-soft);
+}
+.asker-line {
+  font-size: 1.55rem;
+  color: var(--plum);
+  line-height: 1.35;
+  min-height: 2.6em;
+}
+
+.replay-button {
+  background: var(--sunny);
+  border: none;
+  border-radius: 999px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--plum);
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+}
+.replay-button:active { box-shadow: var(--shadow-press); transform: translateY(3px); }
+
+/* ==========================================================================
+   Big answer buttons
+   ========================================================================== */
+.answer-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.answer-button {
+  border: none;
+  border-radius: var(--btn-radius);
+  padding: 28px 12px;
+  font-family: "Fredoka", sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  min-height: 96px;
+}
+.answer-button:active { box-shadow: var(--shadow-press); transform: translateY(4px); }
+.answer-button.yes { background: linear-gradient(135deg, var(--grass), #3E9459); }
+.answer-button.no { background: linear-gradient(135deg, var(--berry), #D14962); }
+.answer-button:disabled { opacity: 0.55; cursor: default; }
+
+.listening-hint {
+  font-size: 1rem;
+  color: var(--plum-soft);
+  text-align: center;
+  min-height: 1.4em;
+}
+.listening-hint.active { color: var(--sky-dark); font-weight: 700; }
+
+/* ==========================================================================
+   Answer capture — mic-first, tap as a demoted fallback
+   ========================================================================== */
+.answer-capture {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.mic-button {
+  width: 108px;
+  height: 108px;
+  border-radius: 50%;
+  border: none;
+  background: radial-gradient(circle at 35% 30%, var(--coral), var(--coral-dark));
+  box-shadow: var(--shadow-soft);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.mic-button svg { width: 46px; height: 46px; }
+.mic-button:active { box-shadow: var(--shadow-press); transform: translateY(3px); }
+.mic-button:disabled { opacity: 0.5; cursor: default; }
+.mic-button.hidden { display: none; }
+
+.mic-button.listening {
+  animation: micPulse 1.1s ease-in-out infinite;
+  background: radial-gradient(circle at 35% 30%, var(--berry), #C94360);
+}
+@keyframes micPulse {
+  0% { box-shadow: var(--shadow-soft), 0 0 0 0 rgba(232, 93, 117, 0.55); }
+  70% { box-shadow: var(--shadow-soft), 0 0 0 22px rgba(232, 93, 117, 0); }
+  100% { box-shadow: var(--shadow-soft), 0 0 0 0 rgba(232, 93, 117, 0); }
+}
+
+.listening-hint {
+  font-size: 1.05rem;
+  color: var(--plum-soft);
+  text-align: center;
+  min-height: 1.4em;
+  font-weight: 700;
+}
+.listening-hint.active { color: var(--berry); }
+
+.fallback-toggle {
+  background: none;
+  border: none;
+  color: var(--plum-soft);
+  font-size: 0.85rem;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 6px 4px;
+}
+
+.answer-grid.answer-grid-small {
+  gap: 10px;
+}
+.answer-grid.answer-grid-small .answer-button {
+  padding: 16px 10px;
+  font-size: 1.1rem;
+  min-height: 60px;
+  box-shadow: none;
+  opacity: 0.9;
+}
+.answer-grid.hidden { display: none; }
+
+/* ==========================================================================
+   Feedback banner
+   ========================================================================== */
+.feedback-banner {
+  width: 100%;
+  border-radius: 20px;
+  padding: 16px 18px;
+  font-family: "Fredoka", sans-serif;
+  font-size: 1.2rem;
+  text-align: center;
+  min-height: 1.6em;
+}
+.feedback-banner.positive { background: var(--grass-soft); color: #2C6E42; }
+.feedback-banner.negative { background: var(--berry-soft); color: #A5324A; }
+.feedback-banner:empty { padding: 0; }
+
+/* ==========================================================================
+   Progress dots (quiz/roleplay round indicator)
+   ========================================================================== */
+.progress-dots {
+  display: flex;
+  gap: 8px;
+}
+.progress-dots .dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #E4DEF2;
+}
+.progress-dots .dot.done { background: var(--sunny); }
+.progress-dots .dot.current { background: var(--coral); }
+
+/* ==========================================================================
+   Confetti
+   ========================================================================== */
+.confetti-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 50;
+}
+.confetti-piece {
+  position: absolute;
+  top: -20px;
+  width: 10px;
+  height: 16px;
+  border-radius: 3px;
+  animation-name: confettiFall;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
+}
+@keyframes confettiFall {
+  0% { top: -20px; opacity: 1; }
+  100% { top: 100vh; opacity: 0.4; }
+}
+
+/* ==========================================================================
+   End-of-round summary
+   ========================================================================== */
+.summary-card {
+  width: 100%;
+  background: #fff;
+  border-radius: var(--card-radius);
+  box-shadow: var(--shadow-soft);
+  padding: 32px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.summary-score {
+  font-family: "Fredoka", sans-serif;
+  font-size: 2.6rem;
+  color: var(--coral);
+}
+.primary-button {
+  background: var(--coral);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 16px 32px;
+  font-family: "Fredoka", sans-serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+}
+.primary-button:active { box-shadow: var(--shadow-press); transform: translateY(4px); }
+
+.secondary-button {
+  background: #fff;
+  color: var(--plum);
+  border: 3px solid var(--plum);
+  border-radius: 999px;
+  padding: 13px 28px;
+  font-family: "Fredoka", sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.secondary-button:active { transform: translateY(3px); }
+
+/* ==========================================================================
+   Parent dashboard
+   ========================================================================== */
+.dash-section {
+  width: 100%;
+  background: #fff;
+  border-radius: var(--card-radius);
+  box-shadow: var(--shadow-soft);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.dash-section h3 {
+  font-size: 1.15rem;
+  color: var(--plum);
+}
+.dash-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.dash-stat {
+  background: var(--grass-soft);
+  border-radius: 16px;
+  padding: 14px 8px;
+  text-align: center;
+}
+.dash-stat .num {
+  font-family: "Fredoka", sans-serif;
+  font-size: 1.5rem;
+  color: var(--grass);
+  display: block;
+}
+.dash-stat .label { font-size: 0.8rem; color: var(--plum-soft); }
+
+.session-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #F0EBFB;
+  font-size: 0.95rem;
+}
+.session-row:last-child { border-bottom: none; }
+.session-mode {
+  font-weight: 700;
+  color: var(--plum);
+}
+.session-score { color: var(--plum-soft); }
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.toggle-row .toggle-label {
+  font-size: 1rem;
+  color: var(--plum);
+}
+.toggle-row .toggle-sub {
+  font-size: 0.82rem;
+  color: var(--plum-soft);
+  margin-top: 2px;
+}
+
+.switch {
+  position: relative;
+  width: 52px;
+  height: 30px;
+  flex-shrink: 0;
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch .slider {
+  position: absolute;
+  inset: 0;
+  background: #E4DEF2;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.switch .slider::before {
+  content: "";
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  left: 3px;
+  top: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+.switch input:checked + .slider { background: var(--grass); }
+.switch input:checked + .slider::before { transform: translateX(22px); }
+
+.asker-toggle-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.asker-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.asker-toggle-row .mini-avatar { width: 40px; height: 40px; flex-shrink: 0; }
+.asker-toggle-row .name { flex: 1; font-weight: 700; color: var(--plum); }
+
+.field-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--plum-soft);
+}
+.text-input {
+  width: 100%;
+  border: 2px solid #E4DEF2;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 1rem;
+  font-family: inherit;
+}
+.text-input:focus {
+  outline: 3px solid var(--sky);
+  outline-offset: 1px;
+}
+
+.custom-q-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 0.95rem;
+}
+.remove-q {
+  background: var(--berry-soft);
+  color: var(--berry);
+  border: none;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.danger-button {
+  background: var(--berry-soft);
+  color: var(--berry);
+  border: none;
+  border-radius: 16px;
+  padding: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.empty-note {
+  color: var(--plum-soft);
+  font-size: 0.95rem;
+  text-align: center;
+  padding: 6px 0;
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .mascot-wrap, .mascot-wrap.celebrate, .confetti-piece {
+    animation: none !important;
+  }
+}
+
+/* Visible keyboard focus everywhere */
+button:focus-visible, input:focus-visible {
+  outline: 3px solid var(--sky);
+  outline-offset: 2px;
+}
+
+@media (min-width: 520px) {
+  .hero h1 { font-size: 2.8rem; }
+}
