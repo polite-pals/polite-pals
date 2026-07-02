@@ -1,0 +1,15 @@
+{
+  "name": "Yes Sir, Yes Ma'am — Practice",
+  "short_name": "Yes Ma'am",
+  "description": "A parent-and-child app for practicing polite yes sir / no sir / yes ma'am / no ma'am responses.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFF8EC",
+  "theme_color": "#FF6B5B",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
