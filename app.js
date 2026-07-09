@@ -5,10 +5,11 @@
    which matters since it needs to run happily from an iPad. */
 
 const state = {
-  screen: "home", // home | quiz | quiz-summary | roleplay-list | roleplay | roleplay-summary | dashboard | stickers
+  screen: "home", // home | quiz | quiz-summary | roleplay-list | roleplay | roleplay-summary | magic-list | magic | magic-summary | dashboard | stickers
   settings: Storage.loadSettings(),
   quiz: null,
   roleplay: null,
+  magic: null,
   dashDraft: { text: "", expected: "yes" }
 };
 
@@ -25,6 +26,9 @@ function render() {
     "roleplay-list": renderRoleplayList,
     roleplay: renderRoleplay,
     "roleplay-summary": renderRoleplaySummary,
+    "magic-list": renderMagicList,
+    magic: renderMagic,
+    "magic-summary": renderMagicSummary,
     dashboard: renderDashboard,
     stickers: renderStickers
   }[state.screen];
@@ -32,12 +36,13 @@ function render() {
 }
 
 function go(screen) {
-  // Only the quiz/roleplay screens want the mic session alive; landing
-  // anywhere else (home, dashboard, a summary screen) means the round
-  // is over, so close it out. Entering quiz/roleplay itself is handled
-  // by startQuiz()/startRoleplay(), which open the session from the
-  // tap that triggered them — a real user gesture.
-  if (screen !== "quiz" && screen !== "roleplay") {
+  // Only the quiz/roleplay/magic screens want the mic session alive;
+  // landing anywhere else (home, dashboard, a summary screen) means
+  // the round is over, so close it out. Entering quiz/roleplay/magic
+  // itself is handled by startQuiz()/startRoleplay()/startMagicGame(),
+  // which open the session from the tap that triggered them — a real
+  // user gesture.
+  if (screen !== "quiz" && screen !== "roleplay" && screen !== "magic") {
     Audio_.endSession();
   }
   state.screen = screen;
@@ -167,6 +172,19 @@ function parseSpokenAnswer(transcript, honorific) {
   return { heardYesNo, honorificMatch };
 }
 
+/* Parses a spoken transcript for one of the four magic-word phrases.
+   Checked most-specific-first since "may I please" and "please" share
+   a word — a transcript containing "may i" should register as "mayi",
+   not "please". Returns null when nothing clear was heard. */
+function parseMagicWordAnswer(transcript) {
+  const t = ` ${transcript.toLowerCase()} `;
+  if (/\bmay i\b/.test(t)) return "mayi";
+  if (/\bthank you\b/.test(t)) return "thankyou";
+  if (/\b(you'?re welcome|your welcome|welcome)\b/.test(t)) return "welcome";
+  if (/\bplease\b/.test(t)) return "please";
+  return null;
+}
+
 /* ==========================================================================
    HOME
    ========================================================================== */
@@ -195,6 +213,13 @@ function renderHome() {
     <div class="tile-text"><h2>Let's Pretend</h2><p>Practice with Grandma, Grandpa, and friends</p></div>`;
   roleplayTile.onclick = () => go("roleplay-list");
   grid.appendChild(roleplayTile);
+
+  const magicTile = el("button", "tile tile-magic");
+  magicTile.innerHTML = `
+    <div class="tile-icon">${simpleIcon("magic")}</div>
+    <div class="tile-text"><h2>Magic Words</h2><p>Practice please, thank you, and may I</p></div>`;
+  magicTile.onclick = () => go("magic-list");
+  grid.appendChild(magicTile);
 
   const stickersTile = el("button", "tile tile-stickers");
   const stickerCount = Storage.loadStickers().length;
@@ -229,6 +254,10 @@ function simpleIcon(kind) {
   if (kind === "stickers") {
     return `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="rgba(255,255,255,0.25)"/>
       <text x="32" y="42" font-size="26" text-anchor="middle">⭐</text></svg>`;
+  }
+  if (kind === "magic") {
+    return `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="rgba(255,255,255,0.25)"/>
+      <text x="32" y="42" font-size="26" text-anchor="middle">✨</text></svg>`;
   }
   return `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="rgba(255,255,255,0.25)"/>
     <rect x="18" y="20" width="28" height="20" rx="4" fill="#fff"/><rect x="24" y="44" width="16" height="4" rx="2" fill="#fff"/></svg>`;
@@ -740,6 +769,255 @@ function renderRoleplaySummary() {
   const home = el("button", "secondary-button", "Home");
   home.onclick = () => go("home");
   card.appendChild(again);
+  card.appendChild(home);
+  screen.appendChild(card);
+  return screen;
+}
+
+/* ==========================================================================
+   MAGIC WORDS (please / thank you / may I please / you're welcome)
+   ========================================================================== */
+function renderMagicList() {
+  const screen = el("div", "screen");
+  screen.appendChild(topbar("Magic Words", "home"));
+  screen.appendChild(el("div", "mascot-wrap", mascotSVG("idle")));
+
+  const grid = el("div", "tile-grid");
+  MAGIC_GAMES.forEach(game => {
+    const tile = el("button", "tile tile-magic");
+    tile.innerHTML = `
+      <div class="tile-icon">${simpleIcon("magic")}</div>
+      <div class="tile-text"><h2>${game.title}</h2><p>${game.subtitle}</p></div>`;
+    tile.onclick = () => startMagicGame(game);
+    grid.appendChild(tile);
+  });
+  screen.appendChild(grid);
+  return screen;
+}
+
+function startMagicGame(game) {
+  const askers = activeAskers();
+  const shuffled = [...game.questions].sort(() => Math.random() - 0.5);
+  const rounds = shuffled.slice(0, Math.min(ROUND_LENGTH, shuffled.length)).map(q => ({
+    question: q,
+    asker: randomFrom(askers)
+  }));
+  state.magic = { game, rounds, index: 0, correct: 0, awaitingAdvance: false };
+  if (state.settings.speechRecognitionEnabled) {
+    Audio_.startSession(handleMicSessionError);
+  }
+  go("magic");
+}
+
+function currentMagicRound() {
+  return state.magic.rounds[state.magic.index];
+}
+
+function renderMagic() {
+  const screen = el("div", "screen");
+  screen.appendChild(topbar(state.magic.game.title, "magic-list"));
+
+  const mascotWrap = el("div", "mascot-wrap");
+  mascotWrap.id = "mascot";
+  mascotWrap.innerHTML = mascotSVG("idle");
+  screen.appendChild(mascotWrap);
+
+  const dots = el("div", "progress-dots");
+  state.magic.rounds.forEach((_, i) => {
+    const d = el("div", "dot");
+    if (i < state.magic.index) d.classList.add("done");
+    if (i === state.magic.index) d.classList.add("current");
+    dots.appendChild(d);
+  });
+  screen.appendChild(dots);
+
+  const round = currentMagicRound();
+  const asker = round.asker;
+
+  const card = el("div", "asker-card");
+  card.innerHTML = `
+    <div class="asker-avatar">${askerAvatarSVG(asker)}</div>
+    <div class="asker-name">${asker.name} asks:</div>
+    <div class="asker-line" id="magic-line">${round.question.spoken}</div>`;
+  const replay = el("button", "replay-button", "🔊 Hear it again");
+  replay.onclick = () => speakCurrentMagicQuestion();
+  card.appendChild(replay);
+  screen.appendChild(card);
+
+  screen.appendChild(buildPhraseCaptureUI(state.magic.game.wordIds, (result) => finalizeMagicAnswer(result)));
+
+  screen.appendChild(el("div", "feedback-banner", ""));
+
+  requestAnimationFrame(() => speakCurrentMagicQuestion());
+  return screen;
+}
+
+/* Same "mic-first, tap as fallback" shape as buildAnswerCaptureUI, but
+   generalized to N phrase buttons instead of a fixed yes/no pair, and
+   parsed with parseMagicWordAnswer instead of checking an honorific. */
+function buildPhraseCaptureUI(wordIds, onResult) {
+  const wrap = el("div", "answer-capture");
+
+  const micBtn = el("button", "mic-button", micIconSVG());
+  micBtn.id = "mic-button";
+  micBtn.setAttribute("aria-label", "Tap and answer out loud");
+  const hint = el("div", "listening-hint", "Get ready to answer out loud!");
+  hint.id = "listening-hint";
+
+  function setListeningVisual(isListening) {
+    micBtn.classList.toggle("listening", isListening);
+    hint.classList.toggle("active", isListening);
+    if (isListening) hint.textContent = "I'm listening...";
+  }
+
+  function beginAccepting() {
+    if (!Audio_.isRecognitionSupported() || !state.settings.speechRecognitionEnabled) {
+      hint.textContent = Audio_.isRecognitionSupported()
+        ? "Tap your answer:"
+        : "Voice isn't available in this browser — tap your answer:";
+      revealFallback();
+      return;
+    }
+    if (!Audio_.isSessionActive()) {
+      Audio_.startSession(handleMicSessionError);
+    }
+    Audio_.setTranscriptHandler((transcript) => {
+      Audio_.setAccepting(false);
+      setListeningVisual(false);
+      onResult({ heardWord: parseMagicWordAnswer(transcript) });
+    });
+    Audio_.setAccepting(true);
+    setListeningVisual(true);
+  }
+  micBtn.onclick = beginAccepting;
+
+  wrap.appendChild(micBtn);
+  wrap.appendChild(hint);
+
+  const fallbackToggle = el("button", "fallback-toggle", "Can't use the mic? Tap your answer instead");
+  const fallbackGrid = el(
+    "div",
+    `answer-grid answer-grid-small${wordIds.length < 2 ? " single" : ""} hidden`
+  );
+  wordIds.forEach(wordId => {
+    const word = MAGIC_WORDS[wordId];
+    const btn = el("button", `answer-button phrase-${wordId}`, word.label);
+    btn.onclick = () => {
+      Audio_.setAccepting(false);
+      onResult({ heardWord: wordId });
+    };
+    fallbackGrid.appendChild(btn);
+  });
+
+  function revealFallback() {
+    fallbackGrid.classList.remove("hidden");
+  }
+  fallbackToggle.onclick = () => fallbackGrid.classList.toggle("hidden");
+
+  wrap.appendChild(fallbackToggle);
+  wrap.appendChild(fallbackGrid);
+
+  if (!state.settings.speechRecognitionEnabled || !Audio_.isRecognitionSupported()) {
+    micBtn.classList.add("hidden");
+    hint.textContent = Audio_.isRecognitionSupported()
+      ? "Tap your answer:"
+      : "Voice isn't available in this browser — tap your answer:";
+    revealFallback();
+    activeMicTrigger = null;
+  } else {
+    activeMicTrigger = beginAccepting;
+  }
+
+  return wrap;
+}
+
+function speakCurrentMagicQuestion() {
+  Audio_.setAccepting(false); // don't process speech while the question itself is being read
+  const round = currentMagicRound();
+  const asker = round.asker;
+  Audio_.speak(round.question.spoken, asker.gender, () => {
+    if (activeMicTrigger) activeMicTrigger();
+  });
+}
+
+function finalizeMagicAnswer({ heardWord }) {
+  if (state.magic.awaitingAdvance) return;
+  const round = currentMagicRound();
+  const expectedWord = MAGIC_WORDS[round.question.expected];
+
+  if (heardWord === null) {
+    return retryMagic("I didn't quite catch that. Let's try again!");
+  }
+  if (heardWord !== round.question.expected) {
+    return retryMagic(`Almost! Try saying "${expectedWord.label}"`);
+  }
+  succeedMagic();
+}
+
+function retryMagic(message) {
+  const banner = document.querySelector(".feedback-banner");
+  if (banner) {
+    banner.textContent = message;
+    banner.className = "feedback-banner negative";
+  }
+  Audio_.playTryAgainTone();
+  setTimeout(() => speakCurrentMagicQuestion(), 900);
+}
+
+function succeedMagic() {
+  state.magic.correct++;
+  state.magic.awaitingAdvance = true;
+  const banner = document.querySelector(".feedback-banner");
+  const mascotWrap = document.getElementById("mascot");
+  const micBtn = document.getElementById("mic-button");
+  document.querySelectorAll(".answer-button").forEach(b => (b.disabled = true));
+  if (micBtn) micBtn.disabled = true;
+
+  banner.textContent = randomFrom([
+    "Wonderful manners!",
+    "That's so polite!",
+    "Great job!",
+    "You did it!"
+  ]);
+  banner.className = "feedback-banner positive";
+  celebrateSuccess(mascotWrap);
+
+  setTimeout(() => {
+    state.magic.index++;
+    if (state.magic.index >= state.magic.rounds.length) {
+      Storage.addSession({
+        mode: "magic",
+        correct: state.magic.correct,
+        total: state.magic.rounds.length,
+        label: state.magic.game.title
+      });
+      go("magic-summary");
+    } else {
+      state.magic.awaitingAdvance = false;
+      render();
+    }
+  }, 1500);
+}
+
+function renderMagicSummary() {
+  const screen = el("div", "screen");
+  screen.appendChild(topbar(state.magic.game.title, "home"));
+  screen.appendChild(el("div", "mascot-wrap celebrate", mascotSVG("happy")));
+
+  const card = el("div", "summary-card");
+  const { correct, rounds } = state.magic;
+  card.innerHTML = `
+    <h2>Great job!</h2>
+    <div class="summary-score">${correct} / ${rounds.length}</div>
+    <p>polite answers</p>`;
+  const again = el("button", "primary-button", "Play Again");
+  again.onclick = () => startMagicGame(state.magic.game);
+  const more = el("button", "secondary-button", "More Magic Words");
+  more.onclick = () => go("magic-list");
+  const home = el("button", "secondary-button", "Home");
+  home.onclick = () => go("home");
+  card.appendChild(again);
+  card.appendChild(more);
   card.appendChild(home);
   screen.appendChild(card);
   return screen;

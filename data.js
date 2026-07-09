@@ -67,6 +67,74 @@ const DEFAULT_QUESTIONS = [
   { spoken: "Is your bed in the kitchen?", expected: "no" }
 ];
 
+/* Magic Words: "please", "thank you", "may I please", and "you're
+   welcome" — taught as their own games (see MAGIC_GAMES) rather than
+   folded into the yes/no quiz, since the skill here is producing the
+   right phrase, not answering yes/no. */
+const MAGIC_WORDS = {
+  please: { id: "please", label: "Please", spoken: "Please" },
+  thankyou: { id: "thankyou", label: "Thank you", spoken: "Thank you" },
+  mayi: { id: "mayi", label: "May I please?", spoken: "May I please?" },
+  welcome: { id: "welcome", label: "You're welcome", spoken: "You're welcome" }
+};
+
+const PLEASE_THANKYOU_QUESTIONS = [
+  { spoken: "You want a cookie. What do you say to ask for one?", expected: "please" },
+  { spoken: "Grandma gives you a new toy. What do you say?", expected: "thankyou" },
+  { spoken: "You want to color. What do you say to ask for crayons?", expected: "please" },
+  { spoken: "Grandpa helps you tie your shoe. What do you say?", expected: "thankyou" },
+  { spoken: "Ms. Rivera says, \"Thank you for helping!\" What do you say back?", expected: "welcome" },
+  { spoken: "You want more milk. What do you say?", expected: "please" },
+  { spoken: "Coach Sam gives you a high five. What do you say?", expected: "thankyou" },
+  { spoken: "Your friend says \"thank you\" for sharing. What do you say back?", expected: "welcome" },
+  { spoken: "You want a turn on the swing. What do you say to ask?", expected: "please" },
+  { spoken: "Grandma tucks you in and kisses you goodnight. What do you say?", expected: "thankyou" },
+  { spoken: "You want a snack. What do you say to ask?", expected: "please" },
+  { spoken: "Someone holds the door open for you. What do you say?", expected: "thankyou" },
+  { spoken: "Grandpa says, \"Thank you for cleaning up!\" What do you say back?", expected: "welcome" },
+  { spoken: "You want help with your shoes. What do you say to ask?", expected: "please" }
+];
+
+const MAY_I_QUESTIONS = [
+  { spoken: "You want to get down from the table. What do you say?", expected: "mayi" },
+  { spoken: "You want to go outside and play. What do you say?", expected: "mayi" },
+  { spoken: "You want a turn with your friend's toy. What do you say?", expected: "mayi" },
+  { spoken: "You want a snack before dinner. What do you say?", expected: "mayi" },
+  { spoken: "You want to sit in Grandpa's chair. What do you say?", expected: "mayi" },
+  { spoken: "You want to watch a show. What do you say?", expected: "mayi" },
+  { spoken: "You want to open the door. What do you say?", expected: "mayi" },
+  { spoken: "You want to help set the table. What do you say?", expected: "mayi" },
+  { spoken: "You want to use Grandma's crayons. What do you say?", expected: "mayi" },
+  { spoken: "You want to feed the dog. What do you say?", expected: "mayi" }
+];
+
+/* Three separate games over the same phrase set: two focused ones
+   (Please & Thank You, May I Please) plus a Mixed round that draws
+   from both — this is the "keep them separate or random" split. */
+const MAGIC_GAMES = [
+  {
+    id: "please-thankyou",
+    title: "Please & Thank You",
+    subtitle: "Ask nicely and say thanks",
+    wordIds: ["please", "thankyou", "welcome"],
+    questions: PLEASE_THANKYOU_QUESTIONS
+  },
+  {
+    id: "may-i",
+    title: "May I Please?",
+    subtitle: "Ask before you do it",
+    wordIds: ["mayi"],
+    questions: MAY_I_QUESTIONS
+  },
+  {
+    id: "mixed-manners",
+    title: "Mixed Magic Words",
+    subtitle: "A little bit of everything",
+    wordIds: ["please", "thankyou", "mayi", "welcome"],
+    questions: [...PLEASE_THANKYOU_QUESTIONS, ...MAY_I_QUESTIONS]
+  }
+];
+
 /* Stickers: the collectible reward a correct answer sometimes earns
    (see rewards.js). Kept as emoji + name so, like everything else here,
    there's nothing to host/download. */

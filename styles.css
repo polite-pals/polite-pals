@@ -155,6 +155,7 @@ button {
 .tile.tile-roleplay { background: linear-gradient(135deg, var(--sky), var(--sky-dark)); }
 .tile.tile-dashboard { background: linear-gradient(135deg, var(--plum-soft), var(--plum)); }
 .tile.tile-stickers { background: linear-gradient(135deg, var(--sunny), var(--sunny-dark)); }
+.tile.tile-magic { background: linear-gradient(135deg, var(--grass), #3E9459); }
 
 .tile-icon {
   width: 64px;
@@ -253,6 +254,10 @@ button {
 .answer-button:active { box-shadow: var(--shadow-press); transform: translateY(4px); }
 .answer-button.yes { background: linear-gradient(135deg, var(--grass), #3E9459); }
 .answer-button.no { background: linear-gradient(135deg, var(--berry), #D14962); }
+.answer-button.phrase-please { background: linear-gradient(135deg, var(--sky), var(--sky-dark)); }
+.answer-button.phrase-thankyou { background: linear-gradient(135deg, var(--grass), #3E9459); }
+.answer-button.phrase-mayi { background: linear-gradient(135deg, var(--coral), var(--coral-dark)); }
+.answer-button.phrase-welcome { background: linear-gradient(135deg, var(--plum-soft), var(--plum)); }
 .answer-button:disabled { opacity: 0.55; cursor: default; }
 
 .listening-hint {
@@ -332,6 +337,7 @@ button {
   opacity: 0.9;
 }
 .answer-grid.hidden { display: none; }
+.answer-grid.single { grid-template-columns: 1fr; }
 
 /* ==========================================================================
    Feedback banner
