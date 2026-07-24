@@ -23,6 +23,19 @@
 <body>
   <div id="app"></div>
 
+  <!-- Face tracking for the Silly Mask Party. MediaPipe FaceLandmarker
+       reports facial "blendshapes" (mouth-open, blink, smile) so the
+       masks can react to expressions. Loaded from CDN as a module and
+       stashed on window for app.js; if it can't load (offline), the
+       party falls back to draggable masks. All processing runs
+       on-device — no video ever leaves the iPad. -->
+  <script type="module">
+    import { FaceLandmarker, FilesetResolver }
+      from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.20";
+    window.__vision = { FaceLandmarker, FilesetResolver };
+    window.dispatchEvent(new Event("vision-ready"));
+  </script>
+
   <script src="data.js"></script>
   <script src="storage.js"></script>
   <script src="audio.js"></script>

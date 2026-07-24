@@ -156,6 +156,7 @@ button {
 .tile.tile-dashboard { background: linear-gradient(135deg, var(--plum-soft), var(--plum)); }
 .tile.tile-stickers { background: linear-gradient(135deg, var(--sunny), var(--sunny-dark)); }
 .tile.tile-magic { background: linear-gradient(135deg, var(--grass), #3E9459); }
+.tile.tile-say { background: linear-gradient(135deg, var(--berry), #D14962); }
 
 .tile-icon {
   width: 64px;
@@ -339,6 +340,15 @@ button {
 .answer-grid.hidden { display: none; }
 .answer-grid.single { grid-template-columns: 1fr; }
 
+/* "What Do You Say?" fallback options: full-width stacked buttons since
+   the labels are whole phrases, with rotating colors so multiple right
+   answers all look equally invited. */
+.answer-grid.say-grid { grid-template-columns: 1fr; }
+.answer-grid.say-grid .answer-button.say-option { background: linear-gradient(135deg, var(--sky), var(--sky-dark)); }
+.answer-grid.say-grid .answer-button.say-option:nth-child(2) { background: linear-gradient(135deg, var(--grass), #3E9459); }
+.answer-grid.say-grid .answer-button.say-option:nth-child(3) { background: linear-gradient(135deg, var(--coral), var(--coral-dark)); }
+.answer-grid.say-grid .answer-button.say-option:nth-child(4) { background: linear-gradient(135deg, var(--plum-soft), var(--plum)); }
+
 /* ==========================================================================
    Feedback banner
    ========================================================================== */
@@ -356,20 +366,47 @@ button {
 .feedback-banner:empty { padding: 0; }
 
 /* ==========================================================================
-   Progress dots (quiz/roleplay round indicator)
+   Star bar (session progress as earned stars — the progress display IS
+   a small reward: each correct answer visibly fills in the next star)
    ========================================================================== */
-.progress-dots {
+.star-bar {
   display: flex;
-  gap: 8px;
+  gap: 6px;
+  align-items: center;
 }
-.progress-dots .dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #E4DEF2;
+.star-bar .star {
+  font-size: 1.5rem;
+  line-height: 1;
+  color: #D8D1EA; /* dim outline stars for rounds not yet reached */
+  filter: grayscale(1) opacity(0.5);
 }
-.progress-dots .dot.done { background: var(--sunny); }
-.progress-dots .dot.current { background: var(--coral); }
+.star-bar .star.earned {
+  color: var(--sunny);
+  filter: none;
+  text-shadow: 0 2px 6px rgba(255, 201, 74, 0.55);
+}
+.star-bar .star.just-earned {
+  animation: star-pop 0.5s ease-out;
+}
+.star-bar .star.missed {
+  color: #C9C2DC; /* question was revealed-and-skipped: stays dim, no shame */
+  filter: none;
+  opacity: 0.8;
+}
+.star-bar .star.current {
+  filter: none;
+  color: var(--coral);
+  animation: star-pulse 1.4s ease-in-out infinite;
+}
+@keyframes star-pop {
+  0% { transform: scale(0.3) rotate(-20deg); }
+  60% { transform: scale(1.4) rotate(8deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+@keyframes star-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.25); opacity: 1; }
+}
 
 /* ==========================================================================
    Confetti
@@ -486,6 +523,60 @@ button {
 }
 
 /* ==========================================================================
+   Silly Mask Party (big end-of-session reward)
+   ========================================================================== */
+.party-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  background: #1B1730;
+  border-radius: var(--card-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+}
+#party-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1); /* mirror, like looking in a mirror */
+}
+#party-video.hidden { display: none; }
+.party-fallback {
+  width: 60%;
+  margin: 18% auto 0;
+}
+.party-fallback.hidden { display: none; }
+.party-mask {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  width: min(60vw, 260px);   /* fallback size; face tracking sets px per-face */
+  height: min(69vw, 300px);
+  transform: translate(-50%, -50%);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
+}
+.party-mask svg { width: 100%; height: 100%; display: block; }
+/* Animated parts the tracker drives. transform-box keeps the origin on
+   each part so eyes blink and the mouth opens from their own centers. */
+.party-mask .m-eye,
+.party-mask .m-mouth {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 60ms linear;
+}
+.party-mask .m-cheek { opacity: 0; transition: opacity 120ms linear; }
+.party-mask.hidden { display: none; }
+.party-hint {
+  font-size: 0.95rem;
+  color: var(--plum-soft);
+  text-align: center;
+  margin-top: 10px;
+}
+/* ==========================================================================
    End-of-round summary
    ========================================================================== */
 .summary-card {
@@ -499,6 +590,11 @@ button {
   flex-direction: column;
   align-items: center;
   gap: 14px;
+}
+.summary-note {
+  font-size: 0.95rem;
+  color: var(--plum-soft);
+  margin: 0;
 }
 .summary-score {
   font-family: "Fredoka", sans-serif;

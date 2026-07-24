@@ -26,8 +26,10 @@ const Rewards = (() => {
 
   /* mascotWrap: the bobbing mascot element to bounce.
      effectHost: a fixed, full-screen container to drop confetti/sparkles
-     into (appended to document.body so it survives the next re-render). */
-  function celebrate({ mascotWrap, effectHost }) {
+     into (appended to document.body so it survives the next re-render).
+     forceSticker: guarantees a sticker regardless of the variant's
+     roll — used for "extra polite" answers (magic word + honorific). */
+  function celebrate({ mascotWrap, effectHost, forceSticker }) {
     const variant = pickVariant();
     if (mascotWrap) mascotWrap.classList.add("celebrate");
 
@@ -48,7 +50,7 @@ const Rewards = (() => {
     }
 
     let sticker = null;
-    if (Math.random() < variant.stickerChance) {
+    if (forceSticker || Math.random() < variant.stickerChance) {
       sticker = randomFrom(STICKER_POOL);
       Storage.addSticker(sticker);
     }
