@@ -116,6 +116,19 @@ function askerAvatarSVG(asker) {
       ? `<path d="M17 46 C13 18 87 18 83 46 L86 78 C80 62 75 60 73 62 L73 40 C60 30 40 30 27 40 L27 62 C25 60 20 62 14 78 Z" fill="${hair}"/>`
       : "";
 
+  // A round, poofy afro halo drawn BEHIND the head — layered circles
+  // wider than the skull so it reads as voluminous rather than a flat
+  // cap. The head circle (drawn after) covers the center, leaving hair
+  // visible all around the edges — Dad specifically.
+  const afroHalo =
+    acc === "afro"
+      ? `<circle cx="50" cy="36" r="34" fill="${hair}"/>
+         <circle cx="20" cy="44" r="13" fill="${hair}"/>
+         <circle cx="80" cy="44" r="13" fill="${hair}"/>
+         <circle cx="32" cy="18" r="13" fill="${hair}"/>
+         <circle cx="68" cy="18" r="13" fill="${hair}"/>`
+      : "";
+
   // Shoulders + neck.
   const body = `
     <path d="M10 100 C12 82 33 75 50 75 C67 75 88 82 90 100 Z" fill="${shirt}"/>
@@ -130,15 +143,34 @@ function askerAvatarSVG(asker) {
 
   // Top hair / hat.
   let top;
-  if (acc === "bun") {
+  if (asker.bald) {
+    // Balding, not fully bald: a fringe of hair above the ears and a
+    // couple of faint comb-over wisps, dome left bare (skin shows
+    // through) — Grandpa specifically.
+    top = `<path d="M17 42 C14 54 18 64 26 68 C22 56 21 46 23 38 C24 31 28 24 35 19 C24 22 18 31 17 42 Z" fill="${hair}"/>
+           <path d="M83 42 C86 54 82 64 74 68 C78 56 79 46 77 38 C76 31 72 24 65 19 C76 22 82 31 83 42 Z" fill="${hair}"/>
+           <path d="M40 22 Q50 18 60 22" stroke="${hair}" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.55"/>`;
+  } else if (acc === "bun") {
     top = `<circle cx="50" cy="13" r="9" fill="${hair}"/>
-           <path d="M20 42 C17 15 83 15 80 42 C66 27 34 27 20 42 Z" fill="${hair}"/>`;
+           <path d="M16 46 C13 20 30 8 50 8 C70 8 87 20 84 46 C78 30 65 26 50 26 C35 26 22 30 16 46 Z" fill="${hair}"/>`;
   } else if (acc === "cap") {
-    top = `<path d="M21 36 C24 13 76 13 79 36 C62 27 38 27 21 36 Z" fill="${shirt}"/>
-           <path d="M12 38 L42 38 L39 45 L14 45 Z" fill="${shirt}"/>
-           <rect x="46" y="10" width="8" height="7" rx="3.5" fill="${hair}"/>`;
+    // A full head of hair plus an athletic sweatband instead of a
+    // baseball cap — reads more clearly as "coach" than a tiny sliver
+    // of hair peeking out from under a cap brim ever did.
+    top = `<path d="M16 46 C13 20 30 8 50 8 C70 8 87 20 84 46 C78 30 65 26 50 26 C35 26 22 30 16 46 Z" fill="${hair}"/>
+           <path d="M17 33 C17 29 31 26 50 26 C69 26 83 29 83 33 L83 39 C83 35 69 32 50 32 C31 32 17 35 17 39 Z" fill="${shirt}"/>`;
+  } else if (acc === "afro") {
+    // The halo (drawn behind the head, see afroHalo above) does all
+    // the work here — no separate front-facing hair needed.
+    top = "";
   } else {
-    top = `<path d="M20 44 C15 16 85 16 80 44 C66 29 34 29 20 44 Z" fill="${hair}"/>`;
+    // Full coverage down to ear-level at the sides (not just a thin
+    // strip across the crown, which read as a "headband" with bare
+    // skin showing beneath it), plus a couple of faint part-line
+    // strokes so it reads as textured hair instead of a flat dome/hat.
+    top = `<path d="M16 46 C13 20 30 8 50 8 C70 8 87 20 84 46 C78 30 65 26 50 26 C35 26 22 30 16 46 Z" fill="${hair}"/>
+           <path d="M40 10 Q37 18 41 26" stroke="rgba(0,0,0,0.2)" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+           <path d="M50 8 Q53 16 50 24" stroke="rgba(0,0,0,0.15)" stroke-width="1.2" fill="none" stroke-linecap="round"/>`;
   }
 
   // Glasses sit over the eyes for the two askers who wear them.
@@ -173,6 +205,7 @@ function askerAvatarSVG(asker) {
   return `
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${asker.name}">
       ${hairBack}
+      ${afroHalo}
       ${body}
       ${head}
       ${top}
@@ -213,6 +246,38 @@ function activeAskers() {
     ? state.settings.activeAskerIds
     : DEFAULT_ASKERS.map(a => a.id);
   return DEFAULT_ASKERS.filter(a => ids.includes(a.id));
+}
+
+/* Most quiz/magic-words/say-game questions carry a fixed askerId (see
+   data.js) so the pre-recorded voice clip always matches the avatar on
+   screen — no more picking a random asker per round. Falls back to a
+   random active asker for content that doesn't have one (parent-added
+   custom quiz questions), or if the assigned asker has been toggled
+   off in Grown-Up Corner. */
+function resolveAsker(question, askers) {
+  if (question.askerId) {
+    const fixed = DEFAULT_ASKERS.find(a => a.id === question.askerId);
+    if (fixed && askers.includes(fixed)) return fixed;
+  }
+  // Primary voice's character got toggled off — try the opposite-gender
+  // alternate (also pre-recorded) before falling back to a fully random
+  // active asker, whose line would only be available in the robotic
+  // TTS voice.
+  if (question.altAskerId) {
+    const alt = DEFAULT_ASKERS.find(a => a.id === question.altAskerId);
+    if (alt && askers.includes(alt)) return alt;
+  }
+  return randomFrom(askers);
+}
+
+/* Which pre-recorded variant (if any) matches the asker actually being
+   shown: the primary clip, the opposite-gender alternate clip (filename
+   suffix "-alt"), or neither (a fully random fallback asker with no
+   matching recording — content falls back to TTS in that rare case). */
+function audioSuffixFor(asker, question) {
+  if (asker.id === question.askerId) return "";
+  if (asker.id === question.altAskerId) return "-alt";
+  return null;
 }
 
 function randomFrom(arr) {
@@ -458,7 +523,7 @@ function startQuiz() {
   const shuffled = [...pool].sort(() => Math.random() - 0.5);
   const rounds = shuffled.slice(0, Math.min(ROUND_LENGTH, shuffled.length)).map(q => ({
     question: q,
-    asker: randomFrom(askers)
+    asker: resolveAsker(q, askers)
   }));
   state.quiz = { rounds, index: 0, correct: 0, awaitingAdvance: false };
   // Open the mic session right here, synchronously, inside the tap
@@ -624,7 +689,10 @@ function speakCurrentQuizQuestion() {
   Audio_.setAccepting(false); // don't process speech while the question itself is being read
   const round = currentQuizRound();
   const asker = round.asker;
-  Audio_.speak(`${round.question.spoken}`, asker.gender, () => {
+  const idx = DEFAULT_QUESTIONS.indexOf(round.question);
+  const suffix = audioSuffixFor(asker, round.question);
+  const audioId = idx >= 0 && suffix !== null ? `quiz-${idx}${suffix}` : null;
+  Audio_.speakLine(audioId, round.question.spoken, asker.gender, () => {
     if (activeMicTrigger) activeMicTrigger();
   });
 }
@@ -824,7 +892,9 @@ function speakCurrentBeat() {
   Audio_.setAccepting(false); // don't process speech while the line itself is being read
   const asker = DEFAULT_ASKERS.find(a => a.id === state.roleplay.scenario.askerId);
   const beat = currentBeat();
-  Audio_.speak(beat.line, asker.gender, () => {
+  const beatIdx = state.roleplay.scenario.beats.indexOf(beat);
+  const audioId = `roleplay-${state.roleplay.scenario.id}-b${beatIdx}-line`;
+  Audio_.speakLine(audioId, beat.line, asker.gender, () => {
     if (activeMicTrigger) activeMicTrigger();
   });
 }
@@ -871,7 +941,9 @@ function succeedRoleplay(saidYes) {
   banner.className = "feedback-banner positive";
   celebrateSuccess(mascotWrap);
 
-  Audio_.speak(reply, asker.gender, () => {
+  const beatIdx = state.roleplay.scenario.beats.indexOf(beat);
+  const audioId = `roleplay-${state.roleplay.scenario.id}-b${beatIdx}-${saidYes ? "yes" : "no"}`;
+  Audio_.speakLine(audioId, reply, asker.gender, () => {
     setTimeout(() => {
       state.roleplay.index++;
       if (state.roleplay.index >= state.roleplay.scenario.beats.length) {
@@ -937,7 +1009,7 @@ function startMagicGame(game) {
   const shuffled = [...game.questions].sort(() => Math.random() - 0.5);
   const rounds = shuffled.slice(0, Math.min(ROUND_LENGTH, shuffled.length)).map(q => ({
     question: q,
-    asker: randomFrom(askers)
+    asker: resolveAsker(q, askers)
   }));
   state.magic = { game, rounds, index: 0, correct: 0, awaitingAdvance: false };
   if (state.settings.speechRecognitionEnabled) {
@@ -1070,7 +1142,15 @@ function speakCurrentMagicQuestion() {
   Audio_.setAccepting(false); // don't process speech while the question itself is being read
   const round = currentMagicRound();
   const asker = round.asker;
-  Audio_.speak(round.question.spoken, asker.gender, () => {
+  let audioId = null;
+  const suffix = audioSuffixFor(asker, round.question);
+  if (suffix !== null) {
+    const ptIdx = PLEASE_THANKYOU_QUESTIONS.indexOf(round.question);
+    const miIdx = MAY_I_QUESTIONS.indexOf(round.question);
+    if (ptIdx >= 0) audioId = `magic-pt-${ptIdx}${suffix}`;
+    else if (miIdx >= 0) audioId = `magic-mi-${miIdx}${suffix}`;
+  }
+  Audio_.speakLine(audioId, round.question.spoken, asker.gender, () => {
     if (activeMicTrigger) activeMicTrigger();
   });
 }
@@ -1168,7 +1248,7 @@ function startSayGame() {
   const shuffled = [...SAY_QUESTIONS].sort(() => Math.random() - 0.5);
   const rounds = shuffled.slice(0, Math.min(ROUND_LENGTH, shuffled.length)).map(q => ({
     question: q,
-    asker: randomFrom(askers)
+    asker: resolveAsker(q, askers)
   }));
   state.say = { rounds, index: 0, correct: 0, attempts: 0, results: [], awaitingAdvance: false };
   if (state.settings.speechRecognitionEnabled) {
@@ -1303,7 +1383,10 @@ function buildSayCaptureUI(round, onResult) {
 function speakCurrentSayQuestion() {
   Audio_.setAccepting(false); // don't process speech while the question itself is being read
   const round = currentSayRound();
-  Audio_.speak(round.question.spoken, round.asker.gender, () => {
+  const idx = SAY_QUESTIONS.indexOf(round.question);
+  const suffix = audioSuffixFor(round.asker, round.question);
+  const audioId = idx >= 0 && suffix !== null ? `say-${idx}-spoken${suffix}` : null;
+  Audio_.speakLine(audioId, round.question.spoken, round.asker.gender, () => {
     if (activeMicTrigger) activeMicTrigger();
   });
 }
@@ -1348,7 +1431,8 @@ function retrySay(message) {
   Audio_.playTryAgainTone();
   if (state.say.attempts >= 2) {
     setTimeout(() => {
-      Audio_.speak("Try again!", currentSayRound().asker.gender, () => {
+      const asker = currentSayRound().asker;
+      Audio_.speakLine(`say-tryagain-${asker.id}`, "Try again!", asker.gender, () => {
         if (activeMicTrigger) activeMicTrigger();
       });
     }, 700);
@@ -1375,7 +1459,10 @@ function revealAndSkipSay() {
     banner.textContent = `The kind thing to say is: "${answerLabel}"`;
     banner.className = "feedback-banner positive";
   }
-  Audio_.speak(`You can say: ${answerLabel}. Let's try the next one!`, round.asker.gender, () => {
+  const idx = SAY_QUESTIONS.indexOf(round.question);
+  const suffix = audioSuffixFor(round.asker, round.question);
+  const audioId = idx >= 0 && suffix !== null ? `say-${idx}-reveal${suffix}` : null;
+  Audio_.speakLine(audioId, `You can say: ${answerLabel}. Let's try the next one!`, round.asker.gender, () => {
     setTimeout(() => advanceSay(false), 400);
   });
 }
@@ -1419,7 +1506,10 @@ function succeedSay(answerIndex, extraPolite) {
 
   // Speak the feedback line — it names WHY the answer was kind, which
   // is the actual lesson — then advance.
-  Audio_.speak(round.question.feedback, round.asker.gender, () => {
+  const idx = SAY_QUESTIONS.indexOf(round.question);
+  const suffix = audioSuffixFor(round.asker, round.question);
+  const audioId = idx >= 0 && suffix !== null ? `say-${idx}-feedback${suffix}` : null;
+  Audio_.speakLine(audioId, round.question.feedback, round.asker.gender, () => {
     setTimeout(() => advanceSay(true), 600);
   });
 }

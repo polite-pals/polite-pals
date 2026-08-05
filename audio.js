@@ -101,6 +101,33 @@ const Audio_ = (() => {
     synth.speak(utter);
   }
 
+  /* Plays a pre-recorded cloned-voice clip (audio/<id>.mp3) when one
+     exists, falling back to browser TTS (speak()) otherwise — so
+     content that was never generated (parent-added custom questions)
+     or a clip that fails to load still gets read aloud, just in the
+     robotic default voice instead of the character's real voice. `id`
+     is optional; omitting it always uses TTS. */
+  function speakLine(id, text, gender, onDone) {
+    if (!id) {
+      speak(text, gender, onDone);
+      return;
+    }
+    const clip = new Audio(`audio/${id}.mp3`);
+    let settled = false;
+    const toFallback = () => {
+      if (settled) return;
+      settled = true;
+      speak(text, gender, onDone);
+    };
+    clip.addEventListener("ended", () => {
+      if (settled) return;
+      settled = true;
+      if (onDone) onDone();
+    });
+    clip.addEventListener("error", toFallback);
+    clip.play().catch(toFallback);
+  }
+
   function isRecognitionSupported() {
     return !!RecognitionCtor;
   }
@@ -407,6 +434,7 @@ const Audio_ = (() => {
 
   return {
     speak,
+    speakLine,
     isRecognitionSupported,
     startSession,
     endSession,

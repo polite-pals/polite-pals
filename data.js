@@ -21,7 +21,8 @@ const DEFAULT_ASKERS = [
     skin: "#E8B88A",
     hair: "#CFCFCF",
     shirt: "#6E9BD1",
-    accessory: "glasses"
+    accessory: "glasses",
+    bald: true
   },
   {
     id: "teacher",
@@ -42,6 +43,25 @@ const DEFAULT_ASKERS = [
     hair: "#5B3A29",
     shirt: "#E86A5B",
     accessory: "cap"
+  },
+  {
+    id: "mom",
+    name: "Mom",
+    honorific: "ma'am",
+    gender: "female",
+    skin: "#E3A272",
+    hair: "#7A4B32",
+    shirt: "#E8779E"
+  },
+  {
+    id: "dad",
+    name: "Dad",
+    honorific: "sir",
+    gender: "male",
+    skin: "#D9A066",
+    hair: "#DEB25E",
+    shirt: "#4C8C6B",
+    accessory: "afro"
   }
 ];
 
@@ -55,26 +75,26 @@ const DEFAULT_ASKERS = [
    hands), so the joke lands even for a 2-year-old, and several pairs
    mirror a "yes" question to reinforce the reasoning. */
 const DEFAULT_QUESTIONS = [
-  { spoken: "Do dogs say woof?", expected: "yes" },
-  { spoken: "Do cats say meow?", expected: "yes" },
-  { spoken: "Do fish swim in water?", expected: "yes" },
-  { spoken: "Do birds have wings?", expected: "yes" },
-  { spoken: "Can you clap your hands?", expected: "yes" },
-  { spoken: "Do you sleep in a bed at night?", expected: "yes" },
-  { spoken: "Do you wear shoes on your feet?", expected: "yes" },
-  { spoken: "Is ice cream cold?", expected: "yes" },
-  { spoken: "Does rain fall from the sky?", expected: "yes" },
-  { spoken: "Do cars have wheels?", expected: "yes" },
-  { spoken: "Do dogs say meow?", expected: "no" },
-  { spoken: "Do you wear shoes on your hands?", expected: "no" },
-  { spoken: "Do you sleep in the bathtub?", expected: "no" },
-  { spoken: "Is ice cream hot?", expected: "no" },
-  { spoken: "Do you brush your teeth with a spoon?", expected: "no" },
-  { spoken: "Do cows drive cars?", expected: "no" },
-  { spoken: "Do you eat cereal with your toes?", expected: "no" },
-  { spoken: "Does a fish ride a bicycle?", expected: "no" },
-  { spoken: "Do you put your pajamas on the dog?", expected: "no" },
-  { spoken: "Is snow warm?", expected: "no" }
+  { spoken: "Do dogs say woof?", expected: "yes", askerId: "grandma", altAskerId: "grandpa" },
+  { spoken: "Do cats say meow?", expected: "yes", askerId: "grandpa", altAskerId: "grandma" },
+  { spoken: "Do fish swim in water?", expected: "yes", askerId: "teacher", altAskerId: "coach" },
+  { spoken: "Do birds have wings?", expected: "yes", askerId: "coach", altAskerId: "teacher" },
+  { spoken: "Can you clap your hands?", expected: "yes", askerId: "mom", altAskerId: "dad" },
+  { spoken: "Do you sleep in a bed at night?", expected: "yes", askerId: "dad", altAskerId: "mom" },
+  { spoken: "Do you wear shoes on your feet?", expected: "yes", askerId: "grandma", altAskerId: "grandpa" },
+  { spoken: "Is ice cream cold?", expected: "yes", askerId: "grandpa", altAskerId: "grandma" },
+  { spoken: "Does rain fall from the sky?", expected: "yes", askerId: "teacher", altAskerId: "coach" },
+  { spoken: "Do cars have wheels?", expected: "yes", askerId: "coach", altAskerId: "teacher" },
+  { spoken: "Do dogs say meow?", expected: "no", askerId: "mom", altAskerId: "dad" },
+  { spoken: "Do you wear shoes on your hands?", expected: "no", askerId: "dad", altAskerId: "mom" },
+  { spoken: "Do you sleep in the bathtub?", expected: "no", askerId: "grandma", altAskerId: "grandpa" },
+  { spoken: "Is ice cream hot?", expected: "no", askerId: "grandpa", altAskerId: "grandma" },
+  { spoken: "Do you brush your teeth with a spoon?", expected: "no", askerId: "teacher", altAskerId: "coach" },
+  { spoken: "Do cows drive cars?", expected: "no", askerId: "coach", altAskerId: "teacher" },
+  { spoken: "Do you eat cereal with your toes?", expected: "no", askerId: "mom", altAskerId: "dad" },
+  { spoken: "Does a fish ride a bicycle?", expected: "no", askerId: "dad", altAskerId: "mom" },
+  { spoken: "Do you put your pajamas on the dog?", expected: "no", askerId: "grandma", altAskerId: "grandpa" },
+  { spoken: "Is snow warm?", expected: "no", askerId: "grandpa", altAskerId: "grandma" }
 ];
 
 /* Magic Words: "please", "thank you", "may I please", and "you're
@@ -89,33 +109,49 @@ const MAGIC_WORDS = {
 };
 
 const PLEASE_THANKYOU_QUESTIONS = [
-  { spoken: "You want a cookie. What do you say to ask for one?", expected: "please" },
-  { spoken: "Grandma gives you a new toy. What do you say?", expected: "thankyou" },
-  { spoken: "You want to color. What do you say to ask for crayons?", expected: "please" },
-  { spoken: "Grandpa helps you tie your shoe. What do you say?", expected: "thankyou" },
-  { spoken: "Ms. Rivera says, \"Thank you for helping!\" What do you say back?", expected: "welcome" },
-  { spoken: "You want more milk. What do you say?", expected: "please" },
-  { spoken: "Coach Sam gives you a high five. What do you say?", expected: "thankyou" },
-  { spoken: "Your friend says \"thank you\" for sharing. What do you say back?", expected: "welcome" },
-  { spoken: "You want a turn on the swing. What do you say to ask?", expected: "please" },
-  { spoken: "Grandma tucks you in and kisses you goodnight. What do you say?", expected: "thankyou" },
-  { spoken: "You want a snack. What do you say to ask?", expected: "please" },
-  { spoken: "Someone holds the door open for you. What do you say?", expected: "thankyou" },
-  { spoken: "Grandpa says, \"Thank you for cleaning up!\" What do you say back?", expected: "welcome" },
-  { spoken: "You want help with your shoes. What do you say to ask?", expected: "please" }
+  { spoken: "You want a cookie. What do you say to ask for one?", expected: "please", askerId: "teacher", altAskerId: "coach" },
+  { spoken: "Grandma gives you a new toy. What do you say?", expected: "thankyou", askerId: "coach", altAskerId: "teacher" },
+  { spoken: "You want to color. What do you say to ask for crayons?", expected: "please", askerId: "mom", altAskerId: "dad" },
+  { spoken: "Grandpa helps you tie your shoe. What do you say?", expected: "thankyou", askerId: "dad", altAskerId: "mom" },
+  { spoken: "Ms. Rivera says, \"Thank you for helping!\" What do you say back?", expected: "welcome", askerId: "grandma", altAskerId: "grandpa" },
+  { spoken: "You want more milk. What do you say?", expected: "please", askerId: "grandpa", altAskerId: "grandma" },
+  { spoken: "Coach Sam gives you a high five. What do you say?", expected: "thankyou", askerId: "teacher", altAskerId: "coach" },
+  { spoken: "Your friend says \"thank you\" for sharing. What do you say back?", expected: "welcome", askerId: "coach", altAskerId: "teacher" },
+  { spoken: "You want a turn on the swing. What do you say to ask?", expected: "please", askerId: "mom", altAskerId: "dad" },
+  { spoken: "Grandma tucks you in and kisses you goodnight. What do you say?", expected: "thankyou", askerId: "dad", altAskerId: "mom" },
+  { spoken: "You want a snack. What do you say to ask?", expected: "please", askerId: "grandma", altAskerId: "grandpa" },
+  { spoken: "Someone holds the door open for you. What do you say?", expected: "thankyou", askerId: "grandpa", altAskerId: "grandma" },
+  { spoken: "Grandpa says, \"Thank you for cleaning up!\" What do you say back?", expected: "welcome", askerId: "teacher", altAskerId: "coach" },
+  { spoken: "You want help with your shoes. What do you say to ask?", expected: "please", askerId: "coach", altAskerId: "teacher" },
+  { spoken: "You want to wear your favorite shirt. What do you say to ask?", expected: "please", askerId: "mom", altAskerId: "dad" },
+  { spoken: "Someone gives you a piggyback ride. What do you say?", expected: "thankyou", askerId: "dad", altAskerId: "mom" },
+  { spoken: "You want to pick the bedtime story. What do you say to ask?", expected: "please", askerId: "grandma", altAskerId: "grandpa" },
+  { spoken: "Grandpa says, \"Thank you for the big hug!\" What do you say back?", expected: "welcome", askerId: "grandpa", altAskerId: "grandma" },
+  { spoken: "You want to line up first. What do you say to ask?", expected: "please", askerId: "teacher", altAskerId: "coach" },
+  { spoken: "Someone passes you the ball. What do you say?", expected: "thankyou", askerId: "coach", altAskerId: "teacher" }
 ];
 
 const MAY_I_QUESTIONS = [
-  { spoken: "You want to get down from the table. What do you say?", expected: "mayi" },
-  { spoken: "You want to go outside and play. What do you say?", expected: "mayi" },
-  { spoken: "You want a turn with your friend's toy. What do you say?", expected: "mayi" },
-  { spoken: "You want a snack before dinner. What do you say?", expected: "mayi" },
-  { spoken: "You want to sit in Grandpa's chair. What do you say?", expected: "mayi" },
-  { spoken: "You want to watch a show. What do you say?", expected: "mayi" },
-  { spoken: "You want to open the door. What do you say?", expected: "mayi" },
-  { spoken: "You want to help set the table. What do you say?", expected: "mayi" },
-  { spoken: "You want to use Grandma's crayons. What do you say?", expected: "mayi" },
-  { spoken: "You want to feed the dog. What do you say?", expected: "mayi" }
+  { spoken: "You want to get down from the table. What do you say?", expected: "mayi", askerId: "dad", altAskerId: "mom" },
+  { spoken: "You want to go outside and play. What do you say?", expected: "mayi", askerId: "grandma", altAskerId: "dad" },
+  { spoken: "You want a turn with your friend's toy. What do you say?", expected: "mayi", askerId: "grandpa", altAskerId: "grandma" },
+  { spoken: "You want a snack before dinner. What do you say?", expected: "mayi", askerId: "teacher", altAskerId: "grandpa" },
+  { spoken: "You want to sit in Grandpa's chair. What do you say?", expected: "mayi", askerId: "coach", altAskerId: "teacher" },
+  { spoken: "You want to watch a show. What do you say?", expected: "mayi", askerId: "mom", altAskerId: "coach" },
+  { spoken: "You want to open the door. What do you say?", expected: "mayi", askerId: "dad", altAskerId: "mom" },
+  { spoken: "You want to help set the table. What do you say?", expected: "mayi", askerId: "grandma", altAskerId: "dad" },
+  { spoken: "You want to use Grandma's crayons. What do you say?", expected: "mayi", askerId: "grandpa", altAskerId: "grandma" },
+  { spoken: "You want to feed the dog. What do you say?", expected: "mayi", askerId: "teacher", altAskerId: "grandpa" },
+  { spoken: "You want to try on the team jersey. What do you say?", expected: "mayi", askerId: "coach", altAskerId: "teacher" },
+  { spoken: "You want to pick out your own clothes. What do you say?", expected: "mayi", askerId: "mom", altAskerId: "coach" },
+  { spoken: "You want to help wash the car. What do you say?", expected: "mayi", askerId: "dad", altAskerId: "mom" },
+  { spoken: "You want another cookie. What do you say?", expected: "mayi", askerId: "grandma", altAskerId: "dad" },
+  { spoken: "You want to read Grandpa's newspaper. What do you say?", expected: "mayi", askerId: "grandpa", altAskerId: "grandma" },
+  { spoken: "You want to be the line leader. What do you say?", expected: "mayi", askerId: "teacher", altAskerId: "grandpa" },
+  { spoken: "You want to try a different game. What do you say?", expected: "mayi", askerId: "coach", altAskerId: "teacher" },
+  { spoken: "You want to stay up a little later. What do you say?", expected: "mayi", askerId: "mom", altAskerId: "coach" },
+  { spoken: "You want to hold the flashlight. What do you say?", expected: "mayi", askerId: "dad", altAskerId: "mom" },
+  { spoken: "You want to pet the neighbor's dog. What do you say?", expected: "mayi", askerId: "grandma", altAskerId: "dad" }
 ];
 
 /* Three separate games over the same phrase set: two focused ones
@@ -167,7 +203,9 @@ const SAY_QUESTIONS = [
       { label: "Thank you!", hear: ["thank"] }
     ],
     distractor: "Take it and say nothing",
-    feedback: "Saying thank you shows you noticed the kindness!"
+    feedback: "Saying thank you shows you noticed the kindness!",
+    askerId: "coach",
+    altAskerId: "teacher"
   },
   {
     spoken: "You know the answer and want to tell the teacher. What should you do?",
@@ -176,7 +214,9 @@ const SAY_QUESTIONS = [
       { label: "Wait to be called on", hear: ["wait", "called on"] }
     ],
     distractor: "Shout the answer",
-    feedback: "Raising your hand gives everyone a turn to talk!"
+    feedback: "Raising your hand gives everyone a turn to talk!",
+    askerId: "mom",
+    altAskerId: "coach"
   },
   {
     spoken: "Oops! You bump into a friend's desk. What do you say?",
@@ -185,7 +225,9 @@ const SAY_QUESTIONS = [
       { label: "I'm sorry!", hear: ["sorry"] }
     ],
     distractor: "Keep walking",
-    feedback: "Saying sorry or excuse me shows you care about others!"
+    feedback: "Saying sorry or excuse me shows you care about others!",
+    askerId: "dad",
+    altAskerId: "mom"
   },
   {
     spoken: "You can't zip your backpack. What do you say?",
@@ -194,7 +236,9 @@ const SAY_QUESTIONS = [
       { label: "May I have some help, please?", hear: ["may i"] }
     ],
     distractor: "Give up and say nothing",
-    feedback: "Asking nicely for help is a big-kid skill!"
+    feedback: "Asking nicely for help is a big-kid skill!",
+    askerId: "grandma",
+    altAskerId: "dad"
   },
   /* --- On the playground --- */
   {
@@ -204,7 +248,9 @@ const SAY_QUESTIONS = [
       { label: "May I please play with you?", hear: ["may i"] }
     ],
     distractor: "Take the ball",
-    feedback: "Asking to join is how you make new friends!"
+    feedback: "Asking to join is how you make new friends!",
+    askerId: "grandpa",
+    altAskerId: "grandma"
   },
   {
     spoken: "Your friend falls down on the playground. What do you say?",
@@ -213,7 +259,9 @@ const SAY_QUESTIONS = [
       { label: "Can I help you?", hear: ["help"] }
     ],
     distractor: "Keep playing",
-    feedback: "Checking on a friend is so kind!"
+    feedback: "Checking on a friend is so kind!",
+    askerId: "teacher",
+    altAskerId: "grandpa"
   },
   {
     spoken: "Someone is on the swing you want. What do you say?",
@@ -222,7 +270,9 @@ const SAY_QUESTIONS = [
       { label: "I'll wait for my turn", hear: ["wait"] }
     ],
     distractor: "Grab the swing",
-    feedback: "Waiting and asking for turns keeps playtime fun for everyone!"
+    feedback: "Waiting and asking for turns keeps playtime fun for everyone!",
+    askerId: "coach",
+    altAskerId: "teacher"
   },
   {
     spoken: "You win the race! What do you say to your friend?",
@@ -231,7 +281,9 @@ const SAY_QUESTIONS = [
       { label: "You did great too!", hear: ["great", "you did"] }
     ],
     distractor: "Say \"I'm the best!\"",
-    feedback: "Being a kind winner makes everyone want to play again!"
+    feedback: "Being a kind winner makes everyone want to play again!",
+    askerId: "mom",
+    altAskerId: "coach"
   },
   /* --- With friends --- */
   {
@@ -240,7 +292,9 @@ const SAY_QUESTIONS = [
       { label: "Thank you!", hear: ["thank"] }
     ],
     distractor: "Just eat it",
-    feedback: "Thank you makes sharing feel good!"
+    feedback: "Thank you makes sharing feel good!",
+    askerId: "dad",
+    altAskerId: "mom"
   },
   {
     spoken: "You and your friend both want the same toy. What do you say?",
@@ -249,7 +303,9 @@ const SAY_QUESTIONS = [
       { label: "Can we take turns?", hear: ["turns", "share"] }
     ],
     distractor: "Grab it",
-    feedback: "Taking turns means you both get to play!"
+    feedback: "Taking turns means you both get to play!",
+    askerId: "grandma",
+    altAskerId: "dad"
   },
   {
     spoken: "Your friend looks sad today. What do you say?",
@@ -258,7 +314,9 @@ const SAY_QUESTIONS = [
       { label: "Do you want to play with me?", hear: ["play"] }
     ],
     distractor: "Walk away",
-    feedback: "Noticing a sad friend is what good friends do!"
+    feedback: "Noticing a sad friend is what good friends do!",
+    askerId: "grandpa",
+    altAskerId: "grandma"
   },
   {
     spoken: "A friend says you can't play with them. What do you say?",
@@ -267,7 +325,9 @@ const SAY_QUESTIONS = [
       { label: "Okay, I'll play something else", hear: ["something else"] }
     ],
     distractor: "Yell at them",
-    feedback: "Using your words — and telling a grown-up if it keeps happening — is just right."
+    feedback: "Using your words — and telling a grown-up if it keeps happening — is just right.",
+    askerId: "teacher",
+    altAskerId: "grandpa"
   },
   /* --- Out and about --- */
   {
@@ -276,7 +336,9 @@ const SAY_QUESTIONS = [
       { label: "Thank you!", hear: ["thank"] }
     ],
     distractor: "Start eating",
-    feedback: "Thanking helpers makes their day brighter!"
+    feedback: "Thanking helpers makes their day brighter!",
+    askerId: "coach",
+    altAskerId: "teacher"
   },
   {
     spoken: "You walk in front of someone at the store. What do you say?",
@@ -285,7 +347,9 @@ const SAY_QUESTIONS = [
       { label: "I'm sorry!", hear: ["sorry"] }
     ],
     distractor: "Keep walking",
-    feedback: "Excuse me is the polite way to pass by!"
+    feedback: "Excuse me is the polite way to pass by!",
+    askerId: "mom",
+    altAskerId: "coach"
   },
   {
     spoken: "Someone holds the door open for you. What do you say?",
@@ -293,7 +357,9 @@ const SAY_QUESTIONS = [
       { label: "Thank you!", hear: ["thank"] }
     ],
     distractor: "Walk through quietly",
-    feedback: "A thank you for holding the door — perfect manners!"
+    feedback: "A thank you for holding the door — perfect manners!",
+    askerId: "dad",
+    altAskerId: "mom"
   },
   {
     spoken: "You finished your food but you're still hungry. What do you say?",
@@ -302,7 +368,52 @@ const SAY_QUESTIONS = [
       { label: "Can I have more, please?", hear: ["more"] }
     ],
     distractor: "Bang the table",
-    feedback: "Asking so nicely — of course you may!"
+    feedback: "Asking so nicely — of course you may!",
+    askerId: "grandma",
+    altAskerId: "dad"
+  },
+  {
+    spoken: "Grandpa gives you his old watch. What do you say?",
+    answers: [
+      { label: "Thank you!", hear: ["thank"] }
+    ],
+    distractor: "Grab it and run off",
+    feedback: "A gift deserves a thank you!",
+    askerId: "grandpa",
+    altAskerId: "grandma"
+  },
+  {
+    spoken: "You need to borrow a pencil from a classmate. What do you say?",
+    answers: [
+      { label: "Can I borrow a pencil, please?", hear: ["borrow", "pencil"] },
+      { label: "May I please borrow a pencil?", hear: ["may i"] }
+    ],
+    distractor: "Take it without asking",
+    feedback: "Asking before you borrow shows respect for their things!",
+    askerId: "teacher",
+    altAskerId: "coach"
+  },
+  {
+    spoken: "You bump shoulders with a teammate during a game. What do you say?",
+    answers: [
+      { label: "Sorry about that!", hear: ["sorry"] },
+      { label: "My bad, you okay?", hear: ["my bad", "okay"] }
+    ],
+    distractor: "Keep playing like nothing happened",
+    feedback: "Checking in after a bump shows good sportsmanship!",
+    askerId: "coach",
+    altAskerId: "teacher"
+  },
+  {
+    spoken: "Mom asks if you're ready to leave and you need one more minute. What do you say?",
+    answers: [
+      { label: "One more minute, please?", hear: ["minute", "please"] },
+      { label: "Almost ready, please wait", hear: ["almost", "wait"] }
+    ],
+    distractor: "Ignore her and keep playing",
+    feedback: "Asking nicely for more time is much better than ignoring!",
+    askerId: "mom",
+    altAskerId: "dad"
   }
 ];
 
@@ -439,6 +550,108 @@ const DEFAULT_SCENARIOS = [
         line: "All done eating! Can you help clean up our table?",
         replyIfYes: "Thank you! What a great helper you are.",
         replyIfNo: "That's okay — let's do it together, it goes faster!"
+      }
+    ]
+  },
+  {
+    id: "gettingdressed",
+    title: "Getting Dressed with Mom",
+    askerId: "mom",
+    beats: [
+      {
+        line: "Time to put on your shoes. Can you try it yourself?",
+        replyIfYes: "Look at you go! Such a big kid.",
+        replyIfNo: "That's okay, I'll help you get started."
+      },
+      {
+        line: "Should we brush your hair before we head out?",
+        replyIfYes: "Perfect! Now you look so nice and neat.",
+        replyIfNo: "Okay, let's do it quick so we're ready to go."
+      }
+    ]
+  },
+  {
+    id: "yardtime",
+    title: "Yard Time with Dad",
+    askerId: "dad",
+    beats: [
+      {
+        line: "Want to help me water the flowers?",
+        replyIfYes: "Great teamwork! They're going to grow so tall.",
+        replyIfNo: "That's alright, you can watch me do it."
+      },
+      {
+        line: "Can you put your bike away when we're done?",
+        replyIfYes: "Thank you! A tidy yard makes me happy.",
+        replyIfNo: "Let's put it away together before we go inside."
+      }
+    ]
+  },
+  {
+    id: "baking",
+    title: "Baking with Grandma",
+    askerId: "grandma",
+    beats: [
+      {
+        line: "Want to help me stir the cookie batter?",
+        replyIfYes: "Wonderful! You're my best baking buddy.",
+        replyIfNo: "That's okay, you can watch and smell the yummy batter."
+      },
+      {
+        line: "Can you wait until the cookies cool down before eating one?",
+        replyIfYes: "Good waiting! Warm cookies taste even better with a little patience.",
+        replyIfNo: "Careful, they're hot — let's wait just a little bit together."
+      }
+    ]
+  },
+  {
+    id: "fishing",
+    title: "Fishing with Grandpa",
+    askerId: "grandpa",
+    beats: [
+      {
+        line: "Ready to cast your line into the pond?",
+        replyIfYes: "Nice cast! Now we wait quietly for a nibble.",
+        replyIfNo: "No rush, we can just watch the water for a while."
+      },
+      {
+        line: "Can you stay quiet so we don't scare the fish?",
+        replyIfYes: "Perfect! You're a natural fisherman.",
+        replyIfNo: "Let's try our best whisper voices."
+      }
+    ]
+  },
+  {
+    id: "grocery",
+    title: "Grocery Store with Mom",
+    askerId: "mom",
+    beats: [
+      {
+        line: "Can you help me find the apples?",
+        replyIfYes: "Great job spotting them! You're such a good helper.",
+        replyIfNo: "That's okay, I'll show you where they are."
+      },
+      {
+        line: "Ready to put the groceries away when we get home?",
+        replyIfYes: "Thank you! Teamwork makes it so quick.",
+        replyIfNo: "Okay, we'll do it together in a little bit."
+      }
+    ]
+  },
+  {
+    id: "blocks",
+    title: "Building Blocks with Dad",
+    askerId: "dad",
+    beats: [
+      {
+        line: "Want to build a tower together?",
+        replyIfYes: "Let's go! This is going to be the tallest one yet.",
+        replyIfNo: "That's alright, maybe we build something else."
+      },
+      {
+        line: "Can you help me clean up the blocks when we're done?",
+        replyIfYes: "Thank you! You're such a great helper.",
+        replyIfNo: "Okay, let's clean up together before bed."
       }
     ]
   }
