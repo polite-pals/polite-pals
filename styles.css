@@ -366,6 +366,25 @@ button {
 .feedback-banner:empty { padding: 0; }
 
 /* ==========================================================================
+   Compact-height layout — the smallest iPhones (e.g. iPhone SE, ~667px
+   tall) are shorter than this app was designed against (iPad). Without
+   this, the mic button — the main thing a toddler needs to tap — sits
+   below the fold on those screens. Tightens spacing/sizing only short
+   enough to need it; iPad and taller iPhones are untouched.
+   ========================================================================== */
+@media (max-height: 700px) {
+  .screen { gap: 12px; }
+  .mascot-wrap { width: 64px; height: 64px; }
+  .asker-card { padding: 14px 18px; gap: 8px; }
+  .asker-avatar { width: 64px; height: 64px; }
+  .asker-line { font-size: 1.25rem; min-height: 1.6em; }
+  .mic-button { width: 76px; height: 76px; }
+  .mic-button svg { width: 32px; height: 32px; }
+  .answer-capture { gap: 6px; }
+  .listening-hint { font-size: 0.9rem; min-height: 1.2em; }
+}
+
+/* ==========================================================================
    Star bar (session progress as earned stars — the progress display IS
    a small reward: each correct answer visibly fills in the next star)
    ========================================================================== */
