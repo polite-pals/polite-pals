@@ -178,6 +178,7 @@ const Audio_ = (() => {
   let accepting = false; // true only while we actually want to process speech
   let transcriptHandler = null; // (transcript) => void, set per-question
   let sessionErrorHandler = null; // (reason) => void, set per-round
+  let reopenTimer = null; // guards against onerror AND onend both scheduling a reopen
 
   function startSession(onError) {
     if (!RecognitionCtor) {
@@ -187,6 +188,20 @@ const Audio_ = (() => {
     sessionWantedActive = true;
     sessionErrorHandler = onError || null;
     openRecognitionInstance();
+  }
+
+  /* A silence timeout fires BOTH onerror ("no-speech") and onend on the
+     same instance — scheduling a reopen from each independently used to
+     race two fresh sessions against each other, leaving the mic in a
+     gappy, half-listening state right as a slower answer might arrive.
+     One shared timer means only the first of the two ever schedules
+     anything. */
+  function scheduleReopen() {
+    if (reopenTimer) return;
+    reopenTimer = setTimeout(() => {
+      reopenTimer = null;
+      if (sessionWantedActive) openRecognitionInstance();
+    }, 250);
   }
 
   function openRecognitionInstance() {
@@ -214,11 +229,7 @@ const Audio_ = (() => {
         // "no-speech" and similar are routine — the browser stops the
         // session after a stretch of silence even in continuous mode.
         // If we still want the mic open, quietly reopen it.
-        if (sessionWantedActive) {
-          setTimeout(() => {
-            if (sessionWantedActive) openRecognitionInstance();
-          }, 250);
-        }
+        if (sessionWantedActive) scheduleReopen();
       };
 
       session.onend = () => {
@@ -228,11 +239,7 @@ const Audio_ = (() => {
         // keeps the mic "open" from the user's perspective without a
         // fresh permission prompt, since it's the same page/tab that
         // already has permission for this round.
-        if (sessionWantedActive) {
-          setTimeout(() => {
-            if (sessionWantedActive) openRecognitionInstance();
-          }, 250);
-        }
+        if (sessionWantedActive) scheduleReopen();
       };
 
       session.start();
@@ -246,6 +253,10 @@ const Audio_ = (() => {
     accepting = false;
     transcriptHandler = null;
     sessionErrorHandler = null;
+    if (reopenTimer) {
+      clearTimeout(reopenTimer);
+      reopenTimer = null;
+    }
     if (session) {
       try {
         session.stop();

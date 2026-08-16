@@ -728,6 +728,11 @@ function retryQuiz(message) {
     banner.textContent = message;
     banner.className = "feedback-banner negative";
   }
+  // After a missed voice attempt, show the tap answers — a voice that's
+  // harder for the browser to recognize shouldn't mean getting stuck
+  // with no visible way to just tap instead.
+  const fallbackGrid = document.querySelector(".answer-grid-small");
+  if (fallbackGrid) fallbackGrid.classList.remove("hidden");
   Audio_.playTryAgainTone();
   setTimeout(() => speakCurrentQuizQuestion(), 900);
 }
@@ -922,6 +927,11 @@ function retryRoleplay(message) {
     banner.textContent = message;
     banner.className = "feedback-banner negative";
   }
+  // After a missed voice attempt, show the tap answers — a voice that's
+  // harder for the browser to recognize shouldn't mean getting stuck
+  // with no visible way to just tap instead.
+  const fallbackGrid = document.querySelector(".answer-grid-small");
+  if (fallbackGrid) fallbackGrid.classList.remove("hidden");
   Audio_.playTryAgainTone();
   setTimeout(() => speakCurrentBeat(), 900);
 }
@@ -1175,6 +1185,11 @@ function retryMagic(message) {
     banner.textContent = message;
     banner.className = "feedback-banner negative";
   }
+  // After a missed voice attempt, show the tap answers — a voice that's
+  // harder for the browser to recognize shouldn't mean getting stuck
+  // with no visible way to just tap instead.
+  const fallbackGrid = document.querySelector(".answer-grid-small");
+  if (fallbackGrid) fallbackGrid.classList.remove("hidden");
   Audio_.playTryAgainTone();
   setTimeout(() => speakCurrentMagicQuestion(), 900);
 }
