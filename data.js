@@ -115,10 +115,10 @@ const PLEASE_THANKYOU_QUESTIONS = [
   { spoken: "Grandpa helps you tie your shoe. What do you say?", expected: "thankyou", askerId: "dad", altAskerId: "mom" },
   { spoken: "Ms. Rivera says, \"Thank you for helping!\" What do you say back?", expected: "welcome", askerId: "grandma", altAskerId: "grandpa" },
   { spoken: "You want more milk. What do you say?", expected: "please", askerId: "grandpa", altAskerId: "grandma" },
-  { spoken: "Coach Sam gives you a high five. What do you say?", expected: "thankyou", askerId: "teacher", altAskerId: "coach" },
+  { spoken: "Coach Sam gives you a team water bottle. What do you say?", expected: "thankyou", askerId: "teacher", altAskerId: "coach" },
   { spoken: "Your friend says \"thank you\" for sharing. What do you say back?", expected: "welcome", askerId: "coach", altAskerId: "teacher" },
   { spoken: "You want a turn on the swing. What do you say to ask?", expected: "please", askerId: "mom", altAskerId: "dad" },
-  { spoken: "Grandma tucks you in and kisses you goodnight. What do you say?", expected: "thankyou", askerId: "dad", altAskerId: "mom" },
+  { spoken: "Grandma brings you a glass of water before bed. What do you say?", expected: "thankyou", askerId: "dad", altAskerId: "mom" },
   { spoken: "You want a snack. What do you say to ask?", expected: "please", askerId: "grandma", altAskerId: "grandpa" },
   { spoken: "Someone holds the door open for you. What do you say?", expected: "thankyou", askerId: "grandpa", altAskerId: "grandma" },
   { spoken: "Grandpa says, \"Thank you for cleaning up!\" What do you say back?", expected: "welcome", askerId: "teacher", altAskerId: "coach" },
@@ -128,7 +128,7 @@ const PLEASE_THANKYOU_QUESTIONS = [
   { spoken: "You want to pick the bedtime story. What do you say to ask?", expected: "please", askerId: "grandma", altAskerId: "grandpa" },
   { spoken: "Grandpa says, \"Thank you for the big hug!\" What do you say back?", expected: "welcome", askerId: "grandpa", altAskerId: "grandma" },
   { spoken: "You want to line up first. What do you say to ask?", expected: "please", askerId: "teacher", altAskerId: "coach" },
-  { spoken: "Someone passes you the ball. What do you say?", expected: "thankyou", askerId: "coach", altAskerId: "teacher" }
+  { spoken: "Coach Sam gives you a sticker for trying hard. What do you say?", expected: "thankyou", askerId: "coach", altAskerId: "teacher" }
 ];
 
 const MAY_I_QUESTIONS = [
@@ -445,11 +445,13 @@ const STICKER_POOL = [
   { emoji: "🐬", name: "Happy Dolphin" }
 ];
 
-/* Roleplay scenarios: short 2-3 beat conversations that teach WHEN to
-   use "sir"/"ma'am", not just the words. Each beat is something the
-   asker says, plus the polite reply the child taps, plus a short
-   response from the asker after a correct tap. Kept very short for
-   a 2-4 year old's attention span. */
+/* Roleplay scenarios: 4-beat conversations that teach WHEN to use
+   "sir"/"ma'am", not just the words. Each beat is something the asker
+   says, plus the polite reply the child taps, plus a short response
+   from the asker after a correct tap. Every scenario opens with a beat
+   that establishes what's happening BEFORE getting into specifics —
+   jumping straight to "stir the batter" without first saying "let's
+   make cookies" is disorienting for a 2-4 year old with no context. */
 const DEFAULT_SCENARIOS = [
   {
     id: "bedtime",
@@ -462,9 +464,19 @@ const DEFAULT_SCENARIOS = [
         replyIfNo: "That's okay, five more minutes. But then bedtime!"
       },
       {
+        line: "Can you put on your pajamas?",
+        replyIfYes: "Wonderful! You look so cozy.",
+        replyIfNo: "Let's get them on together."
+      },
+      {
         line: "Did you brush your teeth?",
         replyIfYes: "Wonderful! Sparkly clean teeth.",
         replyIfNo: "Let's go brush them together!"
+      },
+      {
+        line: "Ready for one story before lights out?",
+        replyIfYes: "I love story time with you. Let's snuggle in.",
+        replyIfNo: "Okay, straight to sleep then. Sweet dreams!"
       }
     ]
   },
@@ -482,6 +494,16 @@ const DEFAULT_SCENARIOS = [
         line: "Can you put the blocks in the box?",
         replyIfYes: "Perfect! Nice and tidy.",
         replyIfNo: "Let's try together!"
+      },
+      {
+        line: "Can you put your books back on the shelf?",
+        replyIfYes: "Nice and neat! Great job.",
+        replyIfNo: "Let's do it together, one at a time."
+      },
+      {
+        line: "Does the room look all clean now?",
+        replyIfYes: "It sure does! You did a wonderful job.",
+        replyIfNo: "Let's take one more look together."
       }
     ]
   },
@@ -496,9 +518,19 @@ const DEFAULT_SCENARIOS = [
         replyIfNo: "Okay, let's walk over together."
       },
       {
+        line: "Can you sit crisscross on your carpet square?",
+        replyIfYes: "Perfect sitting! Thank you.",
+        replyIfNo: "Let's find your spot together."
+      },
+      {
         line: "Can you use your listening ears?",
         replyIfYes: "Excellent listening!",
         replyIfNo: "Let's practice our listening ears together."
+      },
+      {
+        line: "Would you like to sing our good morning song?",
+        replyIfYes: "Yay! Let's sing together.",
+        replyIfNo: "That's okay, you can listen along."
       }
     ]
   },
@@ -516,6 +548,16 @@ const DEFAULT_SCENARIOS = [
         line: "Can you try your best?",
         replyIfYes: "That's the spirit! Great teamwork.",
         replyIfNo: "That's okay, we'll try again together."
+      },
+      {
+        line: "Can you listen for my whistle?",
+        replyIfYes: "Great listening! You're a natural.",
+        replyIfNo: "That's okay, I'll remind you."
+      },
+      {
+        line: "Ready to give your teammates a high five when we're done?",
+        replyIfYes: "Awesome! That's real team spirit.",
+        replyIfNo: "That's okay, a wave works too!"
       }
     ]
   },
@@ -533,6 +575,16 @@ const DEFAULT_SCENARIOS = [
         line: "Your friend wants a turn on the slide. Can you let them go first?",
         replyIfYes: "That's so kind! Taking turns makes everyone happy.",
         replyIfNo: "Hmm, let's think about it — taking turns is fair, and your turn comes next!"
+      },
+      {
+        line: "Can you hold the ladder steady for your friend?",
+        replyIfYes: "Thank you! That's what teammates do.",
+        replyIfNo: "That's alright, maybe next time."
+      },
+      {
+        line: "Time to head back inside. Can you walk, not run?",
+        replyIfYes: "Great walking! Nice and safe.",
+        replyIfNo: "Let's practice our walking feet together."
       }
     ]
   },
@@ -547,6 +599,16 @@ const DEFAULT_SCENARIOS = [
         replyIfNo: "Let's go wash them together — nice and bubbly!"
       },
       {
+        line: "Can you try a bite of your vegetables?",
+        replyIfYes: "Wonderful! Growing bodies need veggies.",
+        replyIfNo: "That's okay, maybe just a little taste?"
+      },
+      {
+        line: "Would you like some more milk?",
+        replyIfYes: "Here you go! Drink up.",
+        replyIfNo: "Okay, let me know if you change your mind."
+      },
+      {
         line: "All done eating! Can you help clean up our table?",
         replyIfYes: "Thank you! What a great helper you are.",
         replyIfNo: "That's okay — let's do it together, it goes faster!"
@@ -559,6 +621,11 @@ const DEFAULT_SCENARIOS = [
     askerId: "mom",
     beats: [
       {
+        line: "Can you help me pick out your shirt for today?",
+        replyIfYes: "Great choice! You have such good taste.",
+        replyIfNo: "That's okay, I'll pick a fun one for you."
+      },
+      {
         line: "Time to put on your shoes. Can you try it yourself?",
         replyIfYes: "Look at you go! Such a big kid.",
         replyIfNo: "That's okay, I'll help you get started."
@@ -567,6 +634,11 @@ const DEFAULT_SCENARIOS = [
         line: "Should we brush your hair before we head out?",
         replyIfYes: "Perfect! Now you look so nice and neat.",
         replyIfNo: "Okay, let's do it quick so we're ready to go."
+      },
+      {
+        line: "Ready to grab your jacket before we go outside?",
+        replyIfYes: "Perfect! Now you'll stay nice and warm.",
+        replyIfNo: "Let's grab it together, just in case."
       }
     ]
   },
@@ -581,6 +653,16 @@ const DEFAULT_SCENARIOS = [
         replyIfNo: "That's alright, you can watch me do it."
       },
       {
+        line: "Can you help me pull a few weeds?",
+        replyIfYes: "Thanks, bud! You're a great gardener.",
+        replyIfNo: "That's okay, I'll get those."
+      },
+      {
+        line: "Want to help me rake up the leaves?",
+        replyIfYes: "Awesome! Big pile coming up.",
+        replyIfNo: "No problem, maybe next time."
+      },
+      {
         line: "Can you put your bike away when we're done?",
         replyIfYes: "Thank you! A tidy yard makes me happy.",
         replyIfNo: "Let's put it away together before we go inside."
@@ -593,9 +675,19 @@ const DEFAULT_SCENARIOS = [
     askerId: "grandma",
     beats: [
       {
+        line: "Want to help me make cookies today?",
+        replyIfYes: "Yay! Let's put on our aprons.",
+        replyIfNo: "That's okay, you can watch and keep me company."
+      },
+      {
         line: "Want to help me stir the cookie batter?",
         replyIfYes: "Wonderful! You're my best baking buddy.",
         replyIfNo: "That's okay, you can watch and smell the yummy batter."
+      },
+      {
+        line: "Can you help me drop the dough onto the tray?",
+        replyIfYes: "Perfect scoops! You're a great baker.",
+        replyIfNo: "That's okay, I'll do this part."
       },
       {
         line: "Can you wait until the cookies cool down before eating one?",
@@ -610,6 +702,11 @@ const DEFAULT_SCENARIOS = [
     askerId: "grandpa",
     beats: [
       {
+        line: "Ready to go fishing at the pond today?",
+        replyIfYes: "Let's grab our poles and head down there.",
+        replyIfNo: "That's okay, we can just go for a walk instead."
+      },
+      {
         line: "Ready to cast your line into the pond?",
         replyIfYes: "Nice cast! Now we wait quietly for a nibble.",
         replyIfNo: "No rush, we can just watch the water for a while."
@@ -618,6 +715,11 @@ const DEFAULT_SCENARIOS = [
         line: "Can you stay quiet so we don't scare the fish?",
         replyIfYes: "Perfect! You're a natural fisherman.",
         replyIfNo: "Let's try our best whisper voices."
+      },
+      {
+        line: "Should we pack up and head home now?",
+        replyIfYes: "Good idea! We had a great day out here.",
+        replyIfNo: "Okay, a little while longer then."
       }
     ]
   },
@@ -627,9 +729,19 @@ const DEFAULT_SCENARIOS = [
     askerId: "mom",
     beats: [
       {
+        line: "Ready to help me shop for groceries today?",
+        replyIfYes: "Great! Let's grab a cart and get started.",
+        replyIfNo: "That's okay, you can just ride along in the cart."
+      },
+      {
         line: "Can you help me find the apples?",
         replyIfYes: "Great job spotting them! You're such a good helper.",
         replyIfNo: "That's okay, I'll show you where they are."
+      },
+      {
+        line: "Can you help me put items on the checkout belt?",
+        replyIfYes: "Thank you! You're such a good helper.",
+        replyIfNo: "That's okay, I've got it."
       },
       {
         line: "Ready to put the groceries away when we get home?",
@@ -647,6 +759,16 @@ const DEFAULT_SCENARIOS = [
         line: "Want to build a tower together?",
         replyIfYes: "Let's go! This is going to be the tallest one yet.",
         replyIfNo: "That's alright, maybe we build something else."
+      },
+      {
+        line: "Can you hand me the blue blocks?",
+        replyIfYes: "Thanks! You're a great building buddy.",
+        replyIfNo: "That's okay, I'll grab them."
+      },
+      {
+        line: "Ready to see how tall we can make it?",
+        replyIfYes: "Let's go for it! Higher and higher.",
+        replyIfNo: "That's okay, this height looks great too."
       },
       {
         line: "Can you help me clean up the blocks when we're done?",

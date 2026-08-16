@@ -40,9 +40,12 @@ const Rewards = (() => {
       Audio_.playSparkleChime();
       Audio_.burstSparkles(effectHost);
     } else if (variant.key === "bounce") {
-      // Cheapest celebration on purpose: just the chime + mascot bounce,
-      // so the bigger effects still stand out as special.
+      // Cheapest celebration on purpose — just a handful of sparkles
+      // (fewer than the dedicated "sparkle" variant) so the bigger
+      // effects still stand out as special, but a correct answer never
+      // visibly does nothing.
       Audio_.playSuccessChime();
+      Audio_.burstSparkles(effectHost, 5);
     } else if (variant.key === "fanfare") {
       Audio_.playBigFanfare();
       Audio_.burstConfetti(effectHost);

@@ -101,6 +101,24 @@ const Audio_ = (() => {
     synth.speak(utter);
   }
 
+  /* A single, reused <audio> element for every pre-recorded clip.
+     Mobile Safari ties its "this element is allowed to autoplay"
+     unlock to the SPECIFIC element that was played during a real user
+     gesture — a fresh `new Audio()` created later from a setTimeout
+     chain (which is how every question after the round's first one
+     gets spoken) isn't guaranteed that unlock, so playback would
+     silently fail. Reusing one element that got its first play close
+     to the tap that started the round keeps every later play() on
+     that same already-unlocked element. */
+  let clipEl = null;
+  function getClipEl() {
+    if (!clipEl) {
+      clipEl = new Audio();
+      clipEl.preload = "auto";
+    }
+    return clipEl;
+  }
+
   /* Plays a pre-recorded cloned-voice clip (audio/<id>.mp3) when one
      exists, falling back to browser TTS (speak()) otherwise — so
      content that was never generated (parent-added custom questions)
@@ -112,19 +130,26 @@ const Audio_ = (() => {
       speak(text, gender, onDone);
       return;
     }
-    const clip = new Audio(`audio/${id}.mp3`);
+    const clip = getClipEl();
     let settled = false;
     const toFallback = () => {
       if (settled) return;
       settled = true;
+      clip.removeEventListener("ended", onEnded);
+      clip.removeEventListener("error", toFallback);
       speak(text, gender, onDone);
     };
-    clip.addEventListener("ended", () => {
+    const onEnded = () => {
       if (settled) return;
       settled = true;
+      clip.removeEventListener("ended", onEnded);
+      clip.removeEventListener("error", toFallback);
       if (onDone) onDone();
-    });
+    };
+    clip.addEventListener("ended", onEnded);
     clip.addEventListener("error", toFallback);
+    clip.src = `audio/${id}.mp3`;
+    clip.currentTime = 0;
     clip.play().catch(toFallback);
   }
 
@@ -414,10 +439,10 @@ const Audio_ = (() => {
 
   /* Rising/twinkling star glyphs — a lighter-weight visual alternative
      to confetti so the celebration doesn't look identical every time. */
-  function burstSparkles(container) {
+  function burstSparkles(container, count) {
     if (!container) return;
     const glyphs = ["✨", "⭐", "💫"];
-    const count = 16;
+    count = count || 16;
     for (let i = 0; i < count; i++) {
       const piece = document.createElement("div");
       piece.className = "sparkle-piece";
