@@ -630,6 +630,10 @@ function buildAnswerCaptureUI(asker, onResult) {
     // and immediately trigger a retry that gets picked up again —
     // cycling before the child ever gets a chance to actually speak.
     setTimeout(() => {
+      // A muted-but-still-running session can keep processing audio it
+      // already captured; restart for a genuinely clean buffer rather
+      // than trusting the pause alone.
+      Audio_.restartSession();
       Audio_.setTranscriptHandler((transcript) => {
         Audio_.setAccepting(false);
         setListeningVisual(false);
@@ -1107,6 +1111,7 @@ function buildPhraseCaptureUI(wordIds, asker, onResult) {
     // exists — gives a speaker's acoustic echo time to settle before
     // the mic starts trusting what it hears.
     setTimeout(() => {
+      Audio_.restartSession();
       Audio_.setTranscriptHandler((transcript) => {
         Audio_.setAccepting(false);
         setListeningVisual(false);
@@ -1359,6 +1364,7 @@ function buildSayCaptureUI(round, onResult) {
     // exists — gives a speaker's acoustic echo time to settle before
     // the mic starts trusting what it hears.
     setTimeout(() => {
+      Audio_.restartSession();
       Audio_.setTranscriptHandler((transcript) => {
         Audio_.setAccepting(false);
         setListeningVisual(false);

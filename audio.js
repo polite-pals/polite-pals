@@ -237,7 +237,17 @@ const Audio_ = (() => {
         if (myToken !== sessionToken) return; // stale instance, ignore
         if (!accepting) return; // ignore speech while TTS is talking, etc.
         const last = event.results[event.results.length - 1];
-        const transcript = last[0].transcript.toLowerCase();
+        const alt = last[0];
+        // Some engines report a confidence score (0-1); when present and
+        // clearly low, treat it as noise rather than a real answer — a
+        // TV, another kid, or car engine noise shouldn't count. Never
+        // reject on an ABSENT/zero confidence value, since several
+        // engines (notably Safari) don't populate this field at all and
+        // report 0 for every result, real or not.
+        if (typeof alt.confidence === "number" && alt.confidence > 0 && alt.confidence < 0.35) {
+          return;
+        }
+        const transcript = alt.transcript.toLowerCase();
         if (transcriptHandler) transcriptHandler(transcript);
       };
 
@@ -294,6 +304,18 @@ const Audio_ = (() => {
     }
     session = null;
     sessionToken++;
+  }
+
+  /* Discards whatever the current session instance has buffered and
+     opens a genuinely fresh one, rather than just flag-muting the
+     existing one. A muted-but-still-running instance can keep
+     processing audio it captured moments ago (an echo of the question
+     that just finished, or the "try again" tone) and still hand back a
+     result once accepting flips true; a full restart guarantees the
+     next thing heard is actually new. Called right before a question
+     starts listening for real. */
+  function restartSession() {
+    if (sessionWantedActive) openRecognitionInstance();
   }
 
   function setAccepting(isAccepting) {
@@ -503,6 +525,7 @@ const Audio_ = (() => {
     isRecognitionSupported,
     startSession,
     endSession,
+    restartSession,
     setAccepting,
     setTranscriptHandler,
     isSessionActive,
