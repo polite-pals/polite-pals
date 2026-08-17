@@ -174,6 +174,7 @@ const Audio_ = (() => {
      the next transcript. That means only one permission check per
      round instead of one per question. */
   let session = null; // the live SpeechRecognition instance, or null
+  let sessionToken = 0; // bumped each time a new instance opens
   let sessionWantedActive = false; // true while a round wants the mic open
   let accepting = false; // true only while we actually want to process speech
   let transcriptHandler = null; // (transcript) => void, set per-question
@@ -204,22 +205,44 @@ const Audio_ = (() => {
     }, 250);
   }
 
+  /* Each instance is tagged with the token that was current when it was
+     created. A replaced (stale) instance's own onerror/onend can still
+     fire AFTER its replacement has already started — without this
+     check, that stray event schedules yet another reopen and discards
+     the barely-started new instance before it ever gets a chance to
+     actually hear anything, which can cascade into the mic restarting
+     every quarter-second forever while "I'm listening" just sits there
+     unchanged. Explicitly detaching and aborting the outgoing instance
+     before replacing it closes the same gap from the other side. */
   function openRecognitionInstance() {
+    if (session) {
+      session.onresult = null;
+      session.onerror = null;
+      session.onend = null;
+      try {
+        session.abort();
+      } catch (e) {
+        /* no-op — already stopped */
+      }
+    }
+    const myToken = ++sessionToken;
     try {
-      session = new RecognitionCtor();
-      session.lang = "en-US";
-      session.continuous = true; // stay open across multiple answers
-      session.interimResults = false;
-      session.maxAlternatives = 1;
+      const instance = new RecognitionCtor();
+      instance.lang = "en-US";
+      instance.continuous = true; // stay open across multiple answers
+      instance.interimResults = false;
+      instance.maxAlternatives = 1;
 
-      session.onresult = (event) => {
+      instance.onresult = (event) => {
+        if (myToken !== sessionToken) return; // stale instance, ignore
         if (!accepting) return; // ignore speech while TTS is talking, etc.
         const last = event.results[event.results.length - 1];
         const transcript = last[0].transcript.toLowerCase();
         if (transcriptHandler) transcriptHandler(transcript);
       };
 
-      session.onerror = (event) => {
+      instance.onerror = (event) => {
+        if (myToken !== sessionToken) return; // stale instance, ignore
         const reason = event.error || "error";
         if (reason === "not-allowed" || reason === "service-not-allowed") {
           sessionWantedActive = false;
@@ -232,7 +255,8 @@ const Audio_ = (() => {
         if (sessionWantedActive) scheduleReopen();
       };
 
-      session.onend = () => {
+      instance.onend = () => {
+        if (myToken !== sessionToken) return; // stale instance, ignore
         // Some browsers end the session on their own even in continuous
         // mode (silence timeouts, tab visibility changes). Reopen it
         // quietly as long as the round still wants the mic on — this
@@ -242,7 +266,8 @@ const Audio_ = (() => {
         if (sessionWantedActive) scheduleReopen();
       };
 
-      session.start();
+      session = instance;
+      instance.start();
     } catch (e) {
       if (sessionErrorHandler) sessionErrorHandler("start-failed");
     }
@@ -258,6 +283,9 @@ const Audio_ = (() => {
       reopenTimer = null;
     }
     if (session) {
+      session.onresult = null;
+      session.onerror = null;
+      session.onend = null;
       try {
         session.stop();
       } catch (e) {
@@ -265,6 +293,7 @@ const Audio_ = (() => {
       }
     }
     session = null;
+    sessionToken++;
   }
 
   function setAccepting(isAccepting) {
