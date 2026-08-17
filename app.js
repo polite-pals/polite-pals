@@ -623,14 +623,22 @@ function buildAnswerCaptureUI(asker, onResult) {
     if (!Audio_.isSessionActive()) {
       Audio_.startSession(handleMicSessionError);
     }
-    Audio_.setTranscriptHandler((transcript) => {
-      Audio_.setAccepting(false);
-      setListeningVisual(false);
-      const parsed = parseSpokenAnswer(transcript, asker.honorific);
-      onResult({ heardYesNo: parsed.heardYesNo, honorificOK: parsed.honorificMatch });
-    });
-    Audio_.setAccepting(true);
-    setListeningVisual(true);
+    // A short pause before actually trusting mic input — without one, an
+    // acoustic echo of the question that just finished playing (very
+    // real on a laptop without headphones) can reach the recognition
+    // engine right as accepting flips on, get misheard as an answer,
+    // and immediately trigger a retry that gets picked up again —
+    // cycling before the child ever gets a chance to actually speak.
+    setTimeout(() => {
+      Audio_.setTranscriptHandler((transcript) => {
+        Audio_.setAccepting(false);
+        setListeningVisual(false);
+        const parsed = parseSpokenAnswer(transcript, asker.honorific);
+        onResult({ heardYesNo: parsed.heardYesNo, honorificOK: parsed.honorificMatch });
+      });
+      Audio_.setAccepting(true);
+      setListeningVisual(true);
+    }, 500);
   }
   micBtn.onclick = beginAccepting;
 
@@ -1095,16 +1103,21 @@ function buildPhraseCaptureUI(wordIds, asker, onResult) {
     if (!Audio_.isSessionActive()) {
       Audio_.startSession(handleMicSessionError);
     }
-    Audio_.setTranscriptHandler((transcript) => {
-      Audio_.setAccepting(false);
-      setListeningVisual(false);
-      onResult({
-        heardWord: parseMagicWordAnswer(transcript),
-        extraPolite: heardHonorific(transcript, asker.honorific)
+    // See buildAnswerCaptureUI's beginAccepting for why this pause
+    // exists — gives a speaker's acoustic echo time to settle before
+    // the mic starts trusting what it hears.
+    setTimeout(() => {
+      Audio_.setTranscriptHandler((transcript) => {
+        Audio_.setAccepting(false);
+        setListeningVisual(false);
+        onResult({
+          heardWord: parseMagicWordAnswer(transcript),
+          extraPolite: heardHonorific(transcript, asker.honorific)
+        });
       });
-    });
-    Audio_.setAccepting(true);
-    setListeningVisual(true);
+      Audio_.setAccepting(true);
+      setListeningVisual(true);
+    }, 500);
   }
   micBtn.onclick = beginAccepting;
 
@@ -1342,16 +1355,21 @@ function buildSayCaptureUI(round, onResult) {
     if (!Audio_.isSessionActive()) {
       Audio_.startSession(handleMicSessionError);
     }
-    Audio_.setTranscriptHandler((transcript) => {
-      Audio_.setAccepting(false);
-      setListeningVisual(false);
-      onResult({
-        answerIndex: parseSayAnswer(transcript, question.answers),
-        extraPolite: heardHonorific(transcript, asker.honorific)
+    // See buildAnswerCaptureUI's beginAccepting for why this pause
+    // exists — gives a speaker's acoustic echo time to settle before
+    // the mic starts trusting what it hears.
+    setTimeout(() => {
+      Audio_.setTranscriptHandler((transcript) => {
+        Audio_.setAccepting(false);
+        setListeningVisual(false);
+        onResult({
+          answerIndex: parseSayAnswer(transcript, question.answers),
+          extraPolite: heardHonorific(transcript, asker.honorific)
+        });
       });
-    });
-    Audio_.setAccepting(true);
-    setListeningVisual(true);
+      Audio_.setAccepting(true);
+      setListeningVisual(true);
+    }, 500);
   }
   micBtn.onclick = beginAccepting;
 
