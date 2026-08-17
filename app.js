@@ -638,7 +638,7 @@ function buildAnswerCaptureUI(asker, onResult) {
       });
       Audio_.setAccepting(true);
       setListeningVisual(true);
-    }, 500);
+    }, 1000);
   }
   micBtn.onclick = beginAccepting;
 
@@ -1117,7 +1117,7 @@ function buildPhraseCaptureUI(wordIds, asker, onResult) {
       });
       Audio_.setAccepting(true);
       setListeningVisual(true);
-    }, 500);
+    }, 1000);
   }
   micBtn.onclick = beginAccepting;
 
@@ -1369,7 +1369,7 @@ function buildSayCaptureUI(round, onResult) {
       });
       Audio_.setAccepting(true);
       setListeningVisual(true);
-    }, 500);
+    }, 1000);
   }
   micBtn.onclick = beginAccepting;
 
